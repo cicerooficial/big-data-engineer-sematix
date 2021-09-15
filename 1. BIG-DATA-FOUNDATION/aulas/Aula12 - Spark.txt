@@ -1,0 +1,231 @@
+DATAFRAME
+Esquemas - DataFrame
+O Spark pode inferir o schema no dados já estruturados.
+O Spark pode tentar inferir o schema no dados de csv e json.
+
+Para inferir o schema dos dados não estruturados:
+EX de dados sem cabeçalho:
+setor.csv
+1, vendas
+2, TI
+3, RH
+
+scala> val sDF = spark.read.csv("setor.csv").printSchema()
+_c0:string (nullable=true)
+_c1:string (nullable=true)
+
+scala> val sDF = spark.read.option("inferSchema","true").csv("setor.csv").printSchema()
+_c0:integer (nullable=true)
+_c1:string (nullable=true)
+
+EX de dados com cabeçalho (mas o spark não sabe que tem cabeçalho):
+setor.csv
+id, setor
+1, vendas
+2, TI
+3, RH
+
+scala> val sDF = spark.read.csv("setor.csv").printSchema()
+_c0:string (nullable=true)
+_c1:string (nullable=true)
+
+scala> val sDF = spark.read.option("inferSchema","true").option("header","true").csv("setor.csv").printSchema()
+_c0:integer (nullable=true)
+_c1:string (nullable=true)
+
+*Sempre criar o Schema e fazer o Spark ler os dados a partir do Schema
+
+Join - DataFrame
+oTipos de Join
+•inner (padrão)
+•outer
+•left_outer
+•right_outer
+•Leftsemi
+
+scala> val cidadeDF = spark.read.option("header","true").csv("cidade.csv")
+scala> clienteDF.join(cidadeDF,"id_c").show()
+
+scala> val cidadeDF = spark.read.option("header","true"),csv("cidade.csv")
+scala> clienteDF.join(cidadeDF,clienteDF("id_c") === cidadeDF("id_c"),"left_outer").show()
+
+___________________________________
+
+Exercícios - Spark - Esquema e Join
+1. Criar o DataFrame alunosDF para ler o arquivo no hdfs “/user/aluno/<nome>/data/escola/alunos.csv” sem usar as “option”
+$ docker exec -it spark bash
+$ scala> spark-shell
+$ scala> val alunosDF = spark.read.csv("/user/aluno/cicero/data/escola/alunos.csv")
+
+2. Visualizar o esquema do alunosDF
+$ scala> alunosDF.printSchema()
+
+3. Criar o DataFrame alunosDF para ler o arquivo “/user/aluno/<nome>/data/escola/alunos.csv” com a opção de incluir o cabeçalho
+$ scala> val alunosDF = spark.read.option("header","true").csv("/user/aluno/cicero/data/escola/alunos.csv")
+
+4. Visualizar o esquema do alunosDF
+$ scala> alunosDF.printSchema()
+
+5. Criar o DataFrame alunosDF para ler o arquivo “/user/aluno/<nome>/data/escola/alunos.csv” com a opção de Incluir o cabeçalho e inferir o esquema
+$ scala> val alunosDF = spark.read.option("header","true").option("inferSchema","true").csv("/user/aluno/cicero/data/escola/alunos.csv")
+
+6. Visualizar o esquema do alunosDF
+$ scala> alunosDF.printSchema()
+
+7. Salvar o DataFrame alunosDF como tabela Hive “tab_alunos” no banco de dados <nome>
+$ scala> alunosDF.write.saveAsTable("cicero.tab_alunos")
+
+Toda tabela Hive é salva em /user/hive/warehouse/<nomeDataBase>.db/<nomeTable>
+$ hdfs dfs -ls /user/hive/warehouse/cicero.db/tab_alunos
+
+8. Criar o DataFrame cursosDF para ler o arquivo “/user/aluno/<nome>/data/escola/cursos.csv” com a opção de Incluir o cabeçalho e inferir o esquema
+$ scala> val cursosDF = spark.read.option("header","true").option("inferSchema","true").csv("/user/aluno/cicero/data/escola/cursos.csv")
+
+9. Criar o DataFrame alunos_cursosDF com o inner join do alunosDF e cursosDF quando o id_curso dos 2 forem o mesmo
+$ scala> val alunos_cursosDF.join(cursosDF,alunosDF("id_curso")===cursosDF("id_curso"),"inner")
+OU
+$ scala> val alunos_cursosDF. = alunosDF.join(cursosDF,"id_curso")
+
+10. Visualizar os dados, o esquema e a quantidade de registros do alunos_cursosDF
+$ scala> alunos_cursosDF.show()
+$ scala> alunos_cursosDF.printSchema()
+$ scala> alunos_cursosDF.count()
+
+
+___________________________________
+
+Spark SQL Queries
+
+Introdução - SQL Queries
+oPode usar a função SparkSession.sql para executar uma consulta SQL
+•Retornar um DataFrame
+scala> val myDF = spark.sql("select * from people")
+scala> myDF.printSchema()
+scala> myDR.show()
+people está localizado onde? Por padrão o Spark busca no /user/hive/warehouse pois ele tem acesso as Tabelas Hive com base no metastore.
+
+Default: Tabelas Hive
+$ scala> val testDF = spark.sql("SELECT * FROM tabela")
+oArquivo Parquet
+$ scala> val testDF spark.sql ("SELECT * FROM parquet.'/bd/tabela.parquet')
+oArquivo Json
+$ scala> val testDF spark.sql ("SELECT * FROM json.'/bd/tabela.json')
+
+Consultas e Views - SQL Queries
+SQL Queries - Exemplo de consultas
+
+oSelect
+oWhere
+oGroup by
+oHaving
+oOrder by
+oLimit
+oCount
+oSum
+oMean
+oAs
+oSubqueries
+$ scala> val maAgeDF = spark.sql("SELECT MEAN(age) AS mean_age, STDDEV(age) AS sdev_age FROM people WHERE pcode IN (SELECT pcode FROM pcodes WHERE state='MA')")
+
+Existem 2 tipos de Viwes
+oSão temporárias
+•Views Regular usar em apenas uma seção Spark
+•Views Global usar em múltiplas seções Spark através de uma aplicação Spark
+
+oCriar uma view
+•DataFrame.createTempView view name
+•DataFrame.createOrReplaceTempView view name
+•DataFrame.createGlobalTempView view name
+scala> val clienteDF = spark.read.json("cliente.json").createTempView("clienteView")
+scala> val tabDF = spark.sql("select * from clienteView").show(10)
+
+API Catalog
+oExplorar tabelas e gerenciar Views
+oUsar spark.catalog
+oFunções
+  •listDatabases
+    oListas banco de dados
+    oCaso não apareça o BD desejado
+      •Problema de configuração do spark
+      •Importar package
+      •setCurrentDatabase nomeBD )
+    oSetar o banco de dados padrão de leitura
+  •listTables
+    oListar tabelas e views do BD atual
+  •listColumns nomeTabela
+    oListar colunas de uma tabela ou view
+  •dropTempView nomeView
+    oRemover view
+
+scala> val tabDF=spark.sql("select * from bdtest.user").show(10)
+
+scala> spark.catalog.listDatabases.show()
+scala> spark.catalog.setCurrentDatabase("bdtest")
+scala> spark.catalog.listTables.show()
+
+scala> val tabDF=spark.sql("select * from user").show(10)
+
+
+___________________________________
+
+Exercícios - Spark - API Catalog
+Realizar os exercícios usando a API Catalog.
+
+1. Visualizar todos os banco de dados
+$ docker exec -it spark bash
+$ scala> spark-shell
+$ scala> spark.catalog.listDatabases.show()
+$ scala> spark.catalog.listDatabases.show(false) (Para visualizar o caminho completo do dataBase)
+
+2. Definir o banco de dados “seu-nome” como principal
+$ scala> spark.catalog.setCurrentDatabase("cicero")
+
+3. Visualizar todas as tabelas do banco de dados “seu-nome”
+$ scala> spark.catalog.listTables("cicero").show()
+
+4. Visualizar as colunas da tabela tab_alunos
+$ scala> spark.catalog.listColumns("tab_alunos").show()
+
+5.  Visualizar os 10 primeiros registos da tabela "tab_alunos" com uso do spark.sql
+$ scala> spark.read.table("tab_aluno").show(10)
+$ scala> spark.sql("select * from tab_alunos LIMIT 10").show(10)
+
+___________________________________
+
+SQL Queries vs Operações de DataFrame
+oFuncionalidade equivalente
+oOtimizadas pelo Catalyst optimizer
+oTransformação DataFrame
+•Maior separabilidade do que as queries
+oSQL queries
+•Facilidade em programação com conhecimento apenas em SQL
+// Transformação DataFrame é possível estruturar melhor as transformações do que as querys SQLs
+scala> val testDF = spark.read.table("cliente").where("id=10255")
+// SQL queries
+scala> val testDF = spark.sql("SELECT * FROM cliente WHERE id = 10255")
+___________________________________
+
+Exercícios - Spark - SQL Queries vs Operações de DataFrame
+Realizar as seguintes consultas usando SQL queries e transformações de DataFrame na tabela “tab_alunos” no banco de dados <nome>
+
+1. Visualizar o id e nome dos 5 primeiros registros
+$ scala> spark.read.table("tab_alunos").show(5)
+OU
+$ scala> spark.sql("select id_discente,nome from tab_alunos LIMIT 5").show()
+
+2. Visualizar o id, nome e ano quando o ano de ingresso for maior ou igual a 2018
+$ scala> spark.sql("select id_discente,nome,ano_ingresso from tab_alunos").show()
+OU
+$ scala> val alunosHiveDF = spark.read.table("tab_alunos")
+$ scala> alunosHiveDF.select("id_discente","nome").limit(5).show()
+
+3. Visualizar por ordem alfabética do nome o id, nome e ano quando o ano de ingresso for maior ou igual a 2018
+$ scala> spark.sql("select id_discente,nome,ano_ingresso from tab_alunos where ano_ingresso >=2018 ORDER BY nome ASC ").show()
+OU
+$ scala> alunosHiveDF.select("id_discente","nome","ano_ingresso").where("ano_ingresso>=2018").orderBy.($"nome".ASC).show()
+
+4. Contar a quantidade de registros do item anterior
+$ scala> spark.sql("select count(id_discente) from tab_alunos where ano_ingresso >=2018").show()
+$ scala> alunosHiveDF.select("id_discente","nome","ano_ingresso").where("ano_ingresso>=2018").count()
+
+

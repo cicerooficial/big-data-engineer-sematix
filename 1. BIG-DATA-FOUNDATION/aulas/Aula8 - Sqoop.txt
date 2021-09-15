@@ -1,0 +1,199 @@
+Aula 8 - Sqoop
+
+IMPORTAÇÃO LOCAL/HDFS
+Importar Dados
+
+Perguntas antes de Importar Dados do RDBMS para o HDFS
+Importar
+- Qual o JDBC?
+- Qual usuário e senha?
+- Qual database?
+- Quais tabelas?
+- Quais dados?
+
+Comando Import
+- Ex
+$sqoop import --connect jdbc:mysql://databse \<diretório> --username root --password secret
+
+Importar tabela, coluna e linha
+--table: Importar de apenas uma tabela
+$sqoop import --table employees --connect jdbc:mysql://databse/employees --username root --password secret
+
+-- columns: Importar colunas específicas
+$sqoop import --connect jdbc:mysql://databse/employees --username root --password secret --columns "id, last_name"
+
+--where: Importar linhas correspondentes
+$sqoop import --connect jdbc:mysql://databse/employees --username root --password secret --where "state='SP'"
+
+Importar Dados - Diretórios
+Armazenar Diretório Diferente
+
+Por padrão, o Sqoop armazena os dados no diretório home do HDFS
+•ex. /user/<username>/<tablename>
+
+otarget dir: Armazenar em um diretório específico
+•$ sqoop import … --target-dir /user/root/db
+
+owarehouse dir: Armazenar em um diretório base
+•$ sqoop import … --warehouse-dir /user/root/db
+
+oDiferença
+•Importar tabela departments
+otarget dir /data = /data
+owarehouse dir /data = /data/departments
+Geralmente utiliza-se o warehousedir pois ele organiza os arquivo criando diretórios, assim não acumula várias tabelas diferentes em um uníco lugar.
+
+Por padrão, o Sqoop falha a importação se o diretório de destino já existir
+oDelete target dir: Sobrescrever o diretório
+•$ sqoop import … --warehouse dir /user/cloudera/db -delete-target-dir
+
+oappend: Anexar os dados no diretório existente
+•$ sqoop import ... --warehouse dir /user/cloudera/db -append
+
+Importar Dados - Delimitadores
+Comandos
+•fields-terminated-by '\<delimitador>'
+•lines-terminated-by '\<delimitador>'
+•Especificar o delimitador
+
+o‘qualquer coisa’, '\b' (backspace), '\n' (newline), '\t' (tab), '0' (NUL)
+•Ex.
+$sqoop import … --fields-terminated-by '\t' --lines-terminated-by '&'
+*Não é obrigatório utilizar os dois
+____________________________________________
+Exercícios - Sqoop - Importação BD Employees
+1. Pesquisar os 10 primeiros registros da tabela employees do banco de dados employees
+Resopsta: sqoop eval --connect jdbc:mysql://database/employees --username root --password secret --query "select * from employees limit 10"
+
+2. Realizar as importações referentes a tabela employees e para validar cada questão,  é necessário visualizar no HDFS*
+
+Importar a tabela employees, no warehouse  /user/hive/warehouse/db_test_a
+Resposta: sqoop import --table employees --connect jdbc:mysql://database/employees --username root --password secret --warehouse-dir /user/hive/warehouse/db_test_a
+
+Visualizar no HDFS:
+$ hdfs dfs -cat /.../db_test/nomeTabela/part-m-00000 | head -n 5
+
+Importar todos os funcionários do gênero masculino, no warehouse  /user/hive/warehouse/db_test_b
+Resposta: sqoop import --table employees --connect jdbc:mysql://database/employees --username root --password secret --where "gender='M'" --warehouse-dir /user/hive/warehouse/db_test_b
+
+Importar o primeiro e o último nome dos funcionários com os campos separados por tabulação, no warehouse  /user/hive/warehouse/db_test_c
+Resposta: sqoop import --table employees --connect jdbc:mysql://database/employees --username root --password secret --columns "first_name, last_name" --fields-terminated-by '\t' --warehouse-dir /user/hive/warehouse/db_test_c
+
+Importar o primeiro e o último nome dos funcionários com as linhas separadas por “ : ” e salvar no mesmo diretório da questão 2.C
+Resposta: sqoop import --table employees --connect jdbc:mysql://database/employees --username root --password secret --columns "first_name, last_name" --lines-terminated-by ':' --warehouse-dir /user/hive/warehouse/db_test_c -delete-target-dir
+
+______________________________________________
+
+OTIMIZAR IMPORTAÇÃO
+
+Paralelismo
+Quantidade de Mapeadores
+Por padrão, o número de mapeadores é 4
+o -m, ou -num-mappers : Quantidade de mapeadores
+•$ sqoop import … -m 2
+
+oDivisão aplicada a coluna com chave primária
+•Se existir
+o -num-mappers 8
+•Se não existir
+o-num-mappers 1
+o-auto-reset-to-one-mapper *Irá manipular as tabelas automaticamente quando identificar que não há o indicador de mapeamento. Preferivel fazer manualmente
+•manipular tabelas automaticamente
+o-num-mappers > 1 = erro pois não tinha indicador e foi tentado acrescentar valor maior que 1
+•Solução split (Mapear coluna sem chave)
+-split by : Dividir mapeadores em uma coluna sem chave
+•$ sqoop import … --split-by id
+*CUIDADO! - Se for uma coluna de valores nulos ele irá ignorar/não importará nenhum valor nulo futuramente também.
+
+Valores Nulos
+oPor padrão o Sqoop importa os dados null como string null
+•Valor escrito para um campo nulo de número
+o--null-non-string<valor
+o$ sqoop import … --null-non-string'-1'
+•Valor escrito para um campo nulo de string
+o--null-string<valor
+o$ sqoop import … --null-string'NA'
+•OBS: Por padrão o HIVE E IMPALA utilizão o \N/\\N como padrão de valores nulos
+o$ sqoop import … --null-non-string '\\N' --null-string '\\N'
+oImportação compatível com Hive e Impala
+
+Formato e Compressão de Dados
+Por padrão o Sqoop armazena os dados no formato de arquivo de texto
+•Formato de arquivo de texto (Default)
+o$ sqoop import … --as-textfile
+•Formato de arquivo de Parquet
+o$ sqoop import … --as-parquetfile
+•Formato de arquivo de Avro
+o$ sqoop import … --as-avrodatafile
+•Formato de arquivo de Sequência
+o sqoop import … --as-sequencefile
+
+Compressão de Dados
+oCodecs suportados
+•/etc/hadoop/conf/core-site.xml
+oComandos
+•Habilitar compressão: $sqoop import … --compress
+•Escolher compressão: --compression-codec<codec>
+EX: $sqoop import … --compress --compression-codec org.apache.hadoop.io.compress.SnappyCode
+__________________________________________
+
+Exercícios - Sqoop - Importação BD Employees - Otimização
+
+Realizar com uso do MySQL
+$ docker exec -it database bash
+$ mysql -h localhost -u root -psecret
+
+1. Criar a tabela cp_titles_date, contendo a cópia da tabela titles com os campos title e to_date
+Resposta:$ create table cp_titles_date select title, to_date from titles;
+
+2. Pesquisar os 15 primeiros registros da tabela cp_titles_date
+Repsosta:$ select * from cp_titles_date limit 15;
+
+3. Alterar os registros do campo to_date para null da tabela cp_titles_date, quando o título for igual a Staff
+Resposta:$ update cp_titles_date set to_date=NULL where title='Staff';
+
+Realizar com uso do Sqoop - Importações no warehouse /user/hive/warehouse/db_test_<numero_questao> e visualizar no HDFS
+
+4. Importar a tabela titles com 8 mapeadores no formato parquet
+Resposta:$ sqoop import --table titles --connect jdbc:mysql://database/employees --username root --password secret -num-mappers 8 --as-parquetfile --warehouse-dir /user/hive/warehouse/db_test_4
+$ hdfs dfs -cat /user/hive/warehouse/
+
+5. Importar a tabela titles com 8 mapeadores no formato parquet e compressão snappy
+Resposta: $ sqoop import --table titles --connect jdbc:mysql://database/employees --username root --password secret -num-mappers 8 --as-parquetfile --warehouse-dir /user/hive/warehouse/db_test_4 --compress --compression-codec org.apache.hadoop.io.compress.SnappyCodec
+
+6. Importar a tabela cp_titles_date com 4 mapeadores (erro)
+Resposta: $ sqoop import --table cp_titles_date --connect jdbc:mysql://database/employees --username root --password secret -m4 --warehouse-dir /user/hive/warehouse/db_test_6
+
+Importar a tabela cp_titles_date com 4 mapeadores divididos pelo campo título no warehouse /user/hive/warehouse/db_test2_title
+Resposta: $ sqoop import --table cp_titles_date --connect jdbc:mysql://database/employees --username root --password secret -m4 --warehouse-dir /user/hive/warehouse/db_test2_tittle --split-by title
+Corrigido:
+$ sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true --table cp_titles_date --connect jdbc:mysql://database/employees --username root --password secret -m4 --warehouse-dir /user/hive/warehouse/db_test2_tittle --split-by title
+
+Importar a tabela cp_titles_date com 4 mapeadores divididos pelo campo data no warehouse /user/hive/warehouse/db_test2_date
+Resposta: $ sqoop import -Dorg.apache.sqoop.splitter.allow_text_splitter=true --table cp_titles_date --connect jdbc:mysql://database/employees --username root --password secret -m4 --warehouse-dir /user/hive/warehouse/db_test2_date --split-by to_date 
+
+Qual a diferença dos registros nulos entre as duas importações?
+Resposta: Title é bem mais leve que o campo Date. Pois o campo Date tem mais campos nulos
+root@namenode:/# hdfs dfs -ls -h -R /user/hive/warehouse/db_test2_title
+drwxr-xr-x   - root supergroup          0 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date
+-rw-r--r--   3 root supergroup          0 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/_SUCCESS
+-rw-r--r--   3 root supergroup          0 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/part-m-00000
+-rw-r--r--   3 root supergroup    443.2 K 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/part-m-00001
+-rw-r--r--   3 root supergroup      2.2 M 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/part-m-00002
+-rw-r--r--   3 root supergroup        456 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/part-m-00003
+-rw-r--r--   3 root supergroup      5.8 M 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/part-m-00004
+-rw-r--r--   3 root supergroup    414.5 K 2021-09-09 23:34 /user/hive/warehouse/db_test2_title/cp_titles_date/part-m-00005
+root@namenode:/# hdfs dfs -ls -h -R /user/hive/warehouse/db_test2_date
+drwxr-xr-x   - root supergroup          0 2021-09-09 23:54 /user/hive/warehouse/db_test2_date/cp_titles_date
+-rw-r--r--   3 root supergroup          0 2021-09-09 23:54 /user/hive/warehouse/db_test2_date/cp_titles_date/_SUCCESS
+-rw-r--r--   3 root supergroup      2.6 M 2021-09-09 23:54 /user/hive/warehouse/db_test2_date/cp_titles_date/part-m-00000
+-rw-r--r--   3 root supergroup          0 2021-09-09 23:54 /user/hive/warehouse/db_test2_date/cp_titles_date/part-m-00001
+-rw-r--r--   3 root supergroup          0 2021-09-09 23:54 /user/hive/warehouse/db_test2_date/cp_titles_date/part-m-00002
+-rw-r--r--   3 root supergroup      5.1 M 2021-09-09 23:54 /user/hive/warehouse/db_test2_date/cp_titles_date/part-m-00003
+
+root@namenode:/# hdfs dfs -count -h /user/hive/warehouse/db_test2_title
+           2            7              8.8 M /user/hive/warehouse/db_test2_title
+root@namenode:/# hdfs dfs -count -h /user/hive/warehouse/db_test2_date
+           2            5              7.7 M /user/hive/warehouse/db_test2_date
+
+BÔNUS - Exercícios - Sqoop - Importação BD Employees - Formato e Compressão

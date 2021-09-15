@@ -1,0 +1,249 @@
+HBASE - Introdução
+
+Armazenamento de Dados
+- https://db-engines.com
+
+Hbase
+- Geralmente para BigData alguns conceitos é considerado real time até 5s de resposta.
+- Orientado a colunas. Dados orientados de forma colunar, com pares de chave-valor.
+
+Estrutura dos Dados
+
+Modelo Dados
+
+1º Nivel - Tabela (Organizar os Dados)
+2º Nivel - Chave da linha (Identificados da linha que armazena os dados)
+3º Nivel - Família da coluna (Colunas são agrupadas em famílias)
+Pesquisa são feitas por famílias;
+Separar as famílias de acordo com as consultas;
+4º Nivel - Nome da coluna (Identificador da coluna)
+5º Nivel - Versão (Valores em célula são controlados pelo número da versão (timestamp))
+6º Nivel - Célula (Chave->Valor)
+Id linha, familia col., coluna e timstamp = valor
+
+Comandos Básicos - HBase
+
+Acesso através do HBase Shell ou API Java
+
+HBase Shell
+•Script que auxilia a manipulação do HBase por linha de comando
+•Inicializar - 
+o$ hbase shell
+
+•Status do HBase
+oNúmero de servidores
+oversion •Versão do HBase
+otable_help •Ajuda sobre comandos de tabelas
+owhoami •Informações sobre o usuário
+ohelp “comando” •Ajuda sobre o comando
+
+Comandos
+
+Manipulação de Tabela
+ocreate
+olist
+odisable
+ois_disabled
+oenable
+ois_enabled
+odescribe
+oalter
+oexists
+odrop
+odrop_all
+oput
+oget
+odelete
+odeleteall
+oscan
+ocount
+otruncate
+
+Inicalizar o container HBase
+$ docker exec -it hbase-master bash
+
+Inicalizar o HBase
+$ hbase shell
+
+MANIPULAÇÃO DE TABELA
+
+oCriar tabela
+•Definir nome das famílias de coluna
+•Sintaxe
+ocreate 'nomeTabela',{NAME=>'família'},{NAME=>'família'}
+ocreate 'nomeTabela', 'família','família'
+•Ex.
+hbase > create 'clientes', { NAME=>'endereco ', VERSIONS=>2}, {NAME=>'pedido'}
+hbase> create 'clientes’, 'endereco', 'pedido'
+
+oListar todas as tabelas •hbase> list
+oEstrutura da tabela •describe 'nomeTabela'
+•Ex. hbase > describe 'clientes'
+oDeletar tabela (precisa desabilitar)
+•drop 'nomeTabela' ou drop_all 'c.*' (Todo mundo que começa com c)
+•Ex. hbase> drop 'clientes'
+oVerificar se a tabela existe
+•hbase> exists 'nomeTabela'
+oVerificar tabelas desabilitadas
+
+oDesabilitar tabela
+•hbase > disable 'nomeTabela'
+•hbase > scan 'nomeTabela' (erro)
+•hbase > disable_all 'r.*' (Todo mundo que começa com r)
+oVerificar se uma tabela está desabilitada
+•hbase > is_disabled 'nomeTabela'
+oHabilitar tabela
+•hbase > enable 'nomeTabela'
+oVerificar se uma tabela está habilitada
+•hbase > is_enable 'nomeTabela'
+oDesabilitar e recriar tabela
+•hbase > truncate 'nomeTabela'
+
+Inserção e Alteração de Dados
+
+oInserir dados
+•put 'nomeTabela','chave','família:coluna','valor'
+•Ex.
+hbase> put 'clientes', 'emiranda', 'endereco:cidade', 'BH'
+hbase> put 'clientes', 'emiranda', 'endereco:estado', 'MG'
+hbase> put 'clientes', 'emiranda', 'pedido:data', '2/2/2016'
+hbase> put 'clientes', 'emiranda', 'pedido:nitem ', '123D'
+oAlterar dados
+hbase> put 'clientes', 'emiranda', pedido:nitem ', '1234A'
+
+Leitura de Dados
+
+o Consultas de Valores pela chave
+•Pela Chave - get
+•Pela Tabela - scan
+
+o Consultar valores pela chave
+•get 'nomeTabela','chave'
+•Ex.
+hbase> get 'clientes'emiranda'
+o Consultar valores da chave pela família de coluna
+•get 'nomeTabela','chave',{COLUMNS=>['familia']}
+•Ex.
+hbase get'clientes','emiranda'{COLUMNS=>['endereco']}
+o Consultar valores da chave pela coluna
+•get 'nomeTabela','chave'{COLUMNS=>['família:coluna']}
+•Ex.
+hbase> get 'clientes', 'emiranda',{COLUMNS=>['endereco:cidade']}
+
+o Consultar todas as linhas e colunas da tabela
+•scan 'nomeTabela'
+•Ex.
+hbase> scan 'clientes'
+o Consultar todas as linhas da tabela pela família de coluna
+•scan 'nomeTabela',{COLUMNS=>['familia']}
+•Ex.
+hbase> scan'clientes',{COLUMNS=>['endereco']}
+o Consultar todas as linhas da tabela pela coluna
+•scan 'nomeTabela',{COLUMNS=>['família:coluna']}
+•Ex.
+hbase> scan 'clientes',{COLUMNS=>['endereco:cidade']}
+
+oConsultar todas as linhas da tabela pela versão de uma coluna
+•scan 'nomeTabela',{COLUMNS=>['família:valor']}
+•Ex.
+hbase> scan 'clientes', {COLUMNS=>['pedido:nitem'], VERSIONS=>5}
+oConsultar todas as linhas da tabela pela chave
+•scan 'nomeTabela',{STARTROW=>'chave', COLUMNS=>['família:valor']}
+•Ex.
+hbase> scan 'clientes', {STARTTROW=>'emi', COLUMNS=>['endereco']}
+
+Deletar Dados
+
+oDeletar Coluna
+•delete 'nomeTabela','chave','família:coluna'
+•Ex.
+hbase> delete 'clientes', 'emiranda', 'endereco:cidade'
+oDeletar Família de coluna
+•delete 'nomeTabela','chave','família'
+•Ex.
+hbase> delete 'clientes','emiranda','endereco'
+oDeletar uma chave
+•deleteall 'nomeTabela','chave'
+•Ex.
+hbase> deleteall 'clientes','emiranda'
+
+Outras opções com tabelas
+
+Schema de uma tabela no HBase= Nome da família de uma coluna
+oAlterar a família de coluna da tabela
+•alter 'nomeTabela', {NAME=>'família', VERSIONS=>Nº}
+
+•Ex.Armazenar mais versões
+hbase> alter 'clientes', {NAME=>'pedido', VERSIONS=>5}
+oAlterar a tabela para deletar a família de coluna
+•alter 'nomeTabela','delete'=>'familia'
+•Ex.
+hbase> alter 'employee','delete'=>'professional'
+
+oContar o número de registros na tabela
+•count 'nomeTabela'
+•Ex.
+hbase> count 'clientes'
+Obs.: Retorna a quantidade de chaves inseridas. 
+CUIDADOS! - Se você fizer 10 puts, ele irá contar 1, pois estará contando a chave, se os puts estiverem usando a mesma chave.
+
+_____________________________________
+
+Exercícios - HBase
+
+1. Criar a tabela ‘controle’ com os dados:
+
+Chave: id
+Família de Coluna: produto e fornecedor
+
+id	produto		fornecedor
+	nome	qtd	nome	estado
+1	ram	100	TI Comp	 SP
+2	hd	50	Peças PC MG
+3	mouse	150	Inf Tec	 SP
+
+Resposta:
+$ create 'controle',{NAME=>'produto'},{NAME=>'fornecedor'}
+$ put 'controle','1','produto:nome','ram'
+$ put 'controle','2','produto:nome','hd'
+$ put 'controle','3','produto:nome','mouse'
+$ put 'controle','1','produto:qtd','100'
+$ put 'controle','2','produto:qtd','50'
+$ put 'controle','3','produto:qtd','150'
+$ put 'controle','1','fornecedor:nome','TI Comp'
+$ put 'controle','2','fornecedor:nome','Peças PC'
+$ put 'controle','3','fornecedor:nome','Inf Tec'
+$ put 'controle','1','fornecedor:estado','SP'
+$ put 'controle','2','fornecedor:estado','MG'
+$ put 'controle','3','fornecedor:estado','SP'
+
+2. Listar as tabelas e verificar a estrutura da tabela ‘controle’
+Resposta: 
+$ list
+$ describe 'controle'
+
+3. Contar o número de registros da tabela ‘controle’
+Resposta: $ count 'controle'
+
+4. Alterar  a família de coluna produto para 3 versões
+Resposta: 
+$ alter 'controle',{NAME=>'produto',VERSIONS=>3}
+
+5. Alterar a quantidade para 200 do id 2
+Resposta:
+$ put 'controle','2','produto:qtd', '200'
+
+6. Pesquisar as versões do id 2 da coluna quantidade
+Resposta: 
+$ get 'controle','2',{COLUMNS=>['produto:qtd'],VERSIONS=>2}
+
+7. Excluir os id do estado de SP
+Resposta: 
+$ deleteall 'controle',{COLUMNS=>'fornecedor:estado',LIMIT=>5,FILTER => "ValueFilter(=, 'binary:SP')"}
+
+8. Deletar a coluna estado da chave 2
+Resposta: 
+$ delete 'controle','2','fornecedor:estado'
+
+9. Pesquisar toda a tabela controle
+Resposta: $ scan 'controle'

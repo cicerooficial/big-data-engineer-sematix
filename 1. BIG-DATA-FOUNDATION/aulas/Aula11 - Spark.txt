@@ -1,0 +1,207 @@
+INTRODUÇÃO
+Introdução - Spark
+Ferramentas de Processamento de Dados 
+- Além do Map Reduce (criado junto com o Hadoop) existem outras ferramentas: Spark(Bash e Real Time), Fiink(Bash e Real Time)
+- Spark - Plataforma de computação em cluster
+
+Estrutura e Inicialização
+
+Spark tem o core em RDD para trabalhar com ETL e processamento em batch
+
+Incialização
+
+Spark Shell - Versão 1
+pyspark para Python
+spark-shell para Scala
+
+Spark Shell - Versão 2
+pyspark2 para Python
+spark2-shell para Scala
+
+Acessar o Spark
+Adicionar o jar para salvar tabelas Hive:
+
+curl -O https://repo1.maven.org/maven2/com/twitter/parquet-hadoop-bundle/1.6.0/parquet-hadoop-bundle-1.6.0.jar (Links para um site externo.)
+docker cp parquet-hadoop-bundle-1.6.0.jar spark:/opt/spark/jars
+
+DATAFRAME - Formas de representar os dados
+Indrodução - DataFrame
+Operações de um DF - Transformação e Ação
+DF - Imutável, não altera sua forma.
+
+Leitura - DataFrame
+Suporta os tipos de arquivos:
+Texto - TextFile, CSV, JSON, PlainText
+Arquivos Binários - Apache Parquet e Apache ORC
+Tables - Hive metastore, JDBC
+Pode-se configurar outros tipos
+
+o val <DATAFRAME>=spark.read.<formato>(“<arquivo>")
+
+•<formato>
+otextFile ("arquivo.txt")
+ocsv ("arquivo.csv")
+ojdbc(jdbcUrl, "bd.tabela", connectionProperties
+oload ou parquet("arquivo.parquet")
+otable ("tabelaHive")
+ojson ("arquivo.json")
+orc ("arquivo.orc")
+
+•<arquivo>
+o"diretório/*".
+o"diretório/*log".
+o"arq1.txt, arq2.txt".
+o"arq*"
+
+oval <DATAFRAME> = spark.read.format("< formato>").load("<arquivo>")
+oOpções para configurar o arquivo de leitura
+•spark.read.option(...)
+scala
+> val userDF = spark.read.json("user.json")
+scala
+> val userDF = spark.read.format("json").load("usr.json")
+
+Ações - DataFrame
+oAção - <dataframe >.<ação>
+EX:
+> val clienteDF = spark.read.json cliente.json
+
+•printSchema() Visualizar a estrutura dos dados
+> clienteDF.printSchema
+
+•count: retorna o número de linhas
+> clienteDF.count
+
+•first: retorna a primeira linha
+> clienteDF.first
+
+•take(n): retorna as primeiras n linhas como um array(mais próximas da memória)
+> clienteDF.take(5)
+
+•show(n): exibe as primeiras n linhas da tabela
+> clienteDF.show (
+
+•distincts: retorna os registros, removendo os repetidos
+> clienteDF.distinct
+
+•collect: Trazer toda a informação dos nós do drive (Cuidado para não estourar a memória)
+> clienteDF.collect () //Cuidado para estourar memória
+
+•write: salvar os dados
+oDataFrame sempre tem um esquema associado
+
+odadosDF.write.
+•save ("arquivoParquet") (Padrão)
+•json ("arquivoJson")
+•csv ("arquivocsv")
+•saveAsTable ("tableHive")
+o(/user/hive/warehouse)
+
+Exemplos:
+scala> dadosDF.write.save("outputData")
+$ hdfs dfs -ls /user/cloudera/outputData
+
+scala> dadosDF.write.mode("append").option("path","/user/root").saveAsTable("outputData")
+
+Transformações - DataFrame
+•Exemplos
+oselect: Selecionar os atributos
+owhere: Filtrar os atributos
+oorderBy: Ordenar os dados por atributo
+ogroupBy: Agrupar os dados por atributo
+ojoin: Mesclar Dados
+olimit(n): Limitar a quantidade de registros
+
+oTransformação individual
+•<dataframe>.<ação>
+oSequência de transformações
+•<dataframe>.<ação>.<ação>.<ação>.<ação>
+scala> val prodQtdDF = prodDF.select("nome","qtd")
+scala> val qtd50DF = prodQtdDF.where("qtd>50")
+scala> val qtd50ordDF = qtd50DF.orderBy("nome")
+scala> qtd50ordDF.show()
+scala> prodDF.select("nome","qtd" where qtd>orderBy ("nome"),show()
+
+oAgrupar (groupBy) com uma função de agregação
+•count
+•max
+•min
+•mean
+•sum
+•pivot
+•agg (Funções de agregação
+scala> peopleDF.groupBy("setor").count()
+scala> peopled.show()
+
+oAcessar o atributo do dado
+•"<atributo>"
+•$"<atributo>" - (para tratar o atributo como operador (para realizar operações matemáticas) é necessário aplicar o $ na frente do atributo.
+•<dataframe>("<atributo>") - para ver funções que pode se realizar com aquele atributo. Tem autocomplete
+scala> prodDF.select("nome","qtd").show()
+scala> prodDF.select($"nome",$"qtd"*0,1).show()
+scala> prodDF.where(prodDF("nome").startsWith("A")).show()
+
+_____________________________________________
+
+Exercícios - Spark - DataFrame
+1. Enviar o diretório local “/input/exercises-data/juros_selic” para o HDFS em “/user/aluno/<nome>/data”
+$ docker-compose up-d
+$ docker exec -it namenode bash
+hdfs> hdfs dfs -put /input/exercises-data/juros_selic /user/aluno/cicero/data
+
+2. Criar o DataFrame jurosDF para ler o arquivo no HDFS “/user/aluno/<nome>/data/juros_selic/juros_selic.json”
+$ docker exec -it spark bash
+$ scala> spark-shell
+$ scala> val jurosDF = spark.read.json("/user/aluno/cicero/data/juros_selic/juros_selic.json")
+
+3. Visualizar o Schema do jurosDF
+$ scala> jurosDF.printSchema()
+
+4. Mostrar os 5 primeiros registros do jutosDF
+$ scala> jurosDF.show(5)
+
+5. Contar a quantidade de registros do jurosDF
+$ scala> jurosDF.count()
+
+6. Criar o DataFrame jurosDF10 para filtrar apenas os registros com o campo “valor” maior que 10
+$ scala> val jurosDF10 = jurosDF.where ("valor>10")
+
+7. Salvar o DataFrame jurosDF10 como tabela Hive “<nome>.tab_juros_selic”
+$ scala> jurosDF10.write.saveAsTable("cicero.tab_juros_selic")
+Toda tabela Hive é salva em /user/hive/warehouse/<nomeDataBase>.db/<nomeTable>
+$ hdfs dfs -ls /user/hive/warehouse/cicero.db/tab_juros_selic
+
+8. Criar o DataFrame jurosHiveDF para ler a tabela “<nome>.tab_juros_selic”
+$ scala> val jurosHiveDF = spark.read.table("cicero.tab_juros_selic")
+
+9. Visualizar o Schema do jurosHiveDF
+$ scala> jurosHiveDF.printSchema()
+
+10. Mostrar os 5 primeiros registros do jurosHiveDF
+$ scala> jurosHiveDF.show(5)
+
+11. Salvar o DataFrame jurosHiveDF no HDFS no diretório “/user/aluno/nome/data/save_juros” no formato parquet
+*verificar se o diretório existe
+*Senão existir, criar o diretório save_juros
+
+$ scala> jurosHiveDF.write.parquet("/user/aluno/cicero/data/save_juros")
+
+12. Visualizar o save_juros no HDFS
+*Sair e ir para o HDFS
+CTRL+D (2x)
+$ docker exec -it namenode bash
+$ hdfs dfs -ls /user/aluno/cicero/data/save_juros
+
+13. Criar o DataFrame jurosHDFS para ler o diretório do “save_juros” da questão 8
+* Entrar no spark novamente
+$ docker exec -it spark bash
+$ spark-shell
+$ scala> val jurosHDFSDF = spark.read.parquet("/user/aluno/cicero/data/save_juros")
+ou .load pois o load por padrão já lê arquivos parquet
+$ scala> val jurosHDFSDF = spark.read.load("/user/aluno/cicero/data/save_juros")
+
+14. Visualizar o Schema do jurosHDFS
+$ scala> jurosHDFSDF.printSchema()
+
+15. Mostrar os 5 primeiros registros do jurosHDFS
+$ scala> jurosHDFSDF.show(5)

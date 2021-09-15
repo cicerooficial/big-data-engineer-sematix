@@ -1,0 +1,19 @@
+Deletar o cluster
+
+Configurações do WSL: https://github.com/MicrosoftDocs/WSL.pt-BR/blob/live/WSL/wsl-config.md
+
+Fechar o cluster
+
+$ cat docker-compose.yml - (Verificar as informações do cluster ex: Inf. de Volumes)
+$ docker-compose stop - (Pautar os containers) 
+$ docker-compose down - (Para e remove os containers) 
+
+Remover containers
+$ cat remove_cointainer.sh - (Ver o script)
+
+Remover tudo
+$ cat kill_all_process.sh - (Ver o script)
+
+Deletar tudo (menos o docker)
+$ cat clean_all.sh - (Ver o script)
+

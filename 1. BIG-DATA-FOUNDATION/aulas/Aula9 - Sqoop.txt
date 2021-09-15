@@ -1,0 +1,205 @@
+Sqoop Job
+oAutomatizar o moode de salvar os comandos de importação e exportação
+•Importar/exportar as linhas atualizadas da tabela do RDBMS/HDFS.
+oComando
+•$ sqoop job ----<atributo>
+
+Atributos Job
+o--create <job-id>: Criar job
+•$ sqoop job --create myjob --import --connect jdbc:mysql://database/db --username root --password secret --table employee --m 1
+o--list: Verificar jobs salvos
+•$ sqoop job --list
+o--show <job-id>: Ver detalhes do job
+•$ sqoop job --show myjob
+o--exe <job-id>: Executar job
+•$ sqoop job --exec myjob
+o--delete <job-id>: Deletar jov
+•$ sqoop job --delete myjob
+
+Carga Incremental - Append
+
+oAnexar dados em um conjunto de dados existentes no HDFS
+•Anexar todos os dados
+o$ sqoop import … --append --where 'id_venda >10'
+•Anexar apenas os novos dados (Incremental)
+oSem sobrescrever os dados, em relação à uma coluna e um valor exclusivo crescente
+o$ sqoop import … --incremental append --check-column id_venda --last-value 50
+
+Carga Incremental - Lastmodified
+
+oInserir dados em um conjunto de dados existentes no HDFS
+•Atualizar apenas os novos dados (Incremental)
+•Sobrescrever os dados, em relação à uma coluna e um valor de data e hora
+oAdicionar o atributo --merge-key
+•Coluna e um valor exclusivo crescente
+o$ sqoop import … -incremental lastmodified --merge-key data_id --check-column data_venda --last-value '2021 01 18'
+
+_______________________________________________
+
+Exercícios - Sqoop –Importação BD Sakila – Carga Incremental
+
+Realizar com uso do MySQL
+--Acessar o Database
+$ docker exec -it database bash
+$ mysql -psecret
+$ show databases;
+$ use employees;
+$ show tables;
+$ use sakila;
+$ select * from rental limit 10;
+
+1. Criar a tabela cp_rental_append, contendo a cópia da tabela rental com os campos rental_id e rental_date
+Resposta: $ create table cp_rental_append select rental_id, rental_date from rental;
+
+$ select * from cp_rental_append limit 5;
+
+2 .Criar a tabela cp_rental_id e cp_rental_date, contendo a cópia da tabela cp_rental_append
+Resposta: $ create table cp_rental_id select * from cp_rental_append;
+$ select * from cp_rental_id limit 5;
+$ create table cp_rental_date select * from cp_rental_append;
+$ select * from cp_rental_date limit 5;
+
+Realizar com uso do Sqoop - Importações no warehouse /user/hive/warehouse/db_test3 e visualizar no HDFS
+CTRL+D (X2) para sair do mysql e do database
+
+3. Importar as tabelas cp_rental_append, cp_rental_id e cp_rental_date com 1 mapeador
+Resposta:
+$ sqoop import --table cp_rental_append --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3
+$ sqoop import --table cp_rental_id --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3
+$ sqoop import --table cp_rental_date --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3
+$ hdfs dfs -ls -R /user/hive/warehouse/db_test3
+
+Realizar com uso do MySQL
+
+4. Executar o sql /db-sql/sakila/insert_rental.sql no container do database
+
+$ docker exec -it database bash
+$ cd /db-sql/sakila
+
+*Atualizar o scrip 
+Atualizar o apt-get:
+apt-get update
+apt-get install apt-file
+apt-file update
+apt-get --upgradable
+apt-get install vi
+apt-get install vim
+apt-get install nano
+Atualizar as últimas linhas deixando somente rental_id e rental_date
+$ mysql -psecret < insert_rental.sql
+ 
+Realizar com uso do Sqoop - Importações no warehouse /user/hive/warehouse/db_test3 e visualizar no HDFS
+
+5. Atualizar a tabela cp_rental_append no HDFS anexando os novos arquivos
+sqoop import --table cp_rental_append --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3 append
+
+6. Atualizar a tabela cp_rental_id no HDFS de acordo com o último registro de rental_id, adicionando apenas os novos dados.
+Resposta: $ sqoop import --table cp_rental_id --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3 --incremental append --check-column rental_id --last-value 16049
+
+7. Atualizar a tabela cp_rental_date no HDFS de acordo com o último registro de rental_date, atualizando os registros a partir desta data.
+Resposta: $ sqoop import --table cp_rental_date --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3 --incremental lastmodified --check-column rental_date --last-value '2005-08-23 22:50:12'
+sqoop import --table cp_rental_date --connect jdbc:mysql://database/sakila --username root --password secret -m 1 --warehouse-dir /user/hive/warehouse/db_test3 --incremental lastmodified --merge-key rental_id --check-column rental_date --last-value '2005-08-23 22:50:12'
+
+Ultimos arquivos
++-----------+---------------------+
+ rental_id  | rental_date         | 
++-----------+---------------------+
+|     16049 | 2005-08-23 22:50:12 |
+|     16048 | 2005-08-23 22:43:07 |
+|     16047 | 2005-08-23 22:42:48 |
+|     16046 | 2005-08-23 22:26:47 |
+|     16045 | 2005-08-23 22:25:26 |
+_______________________________________________
+
+Importação Local/Hive
+Importar Dados no Hive
+oPadrão tabela Hive
+•Caminho padrão das Tabelas Hive
+o /user/hive/warehouse
+oBom desempenho
+•Formato Parquet
+•Compressão Snappy
+
+oSqoop é pré configurado para mapear a maioria dos tipos SQL para Java ou Hive
+•--map-column-java : Mapeamento para java
+o$ sqoop import ... -map-column-java id=String,value=Integer
+•--map-column-hive : Mapeamento para hive
+o$ sqoop import ... -map-column-hive id=String,value=Integer
+
+Importação Tabela Hive
+sqoop import ...
+o --hive-import
+•Importar tabela para o Hive
+o --hive-overwrite
+•Sobrescrever os dados se a tabela hive existir
+o --create-hive-table
+•O job irá falhar se uma tabela hive existir
+o --hive-table
+•Especificar o nome da tabela hive
+•Comando:
+o --hive-table <db_name>.<table_name>
+
+Ex:
+o $ sqoop import --table employees --connect jdbc:mysql://database/employees --username=root --password=secrect --warehouse-dir=/user/hive/warehouse/teste.db --hive-import --create-hive-table --hive-table teste.user
+
+Exportação HDFS/Local
+Exportar Dados do HDFS para o RDBMS
+o Exportar
+•Qual diretório do HDFS
+•Qual JDBC?
+•Qual usuário e senha?
+•Qual database
+•Quais tabelas?
+•Quais dados?
+
+oComando
+•export
+•ex
+o $ sqoop export --connect jdbc:mysql://database/log --username root --password secret
+
+o Definir o diretório de leitura no HDFS
+•--export-dir <diretório>
+oDefinir o nome da Tabela no SGBD
+•--table <nome_tabela>
+oOpção de Atualização:
+•--update-mode
+o updateonly (default)
+•Acrescenta novas linhas na tabela
+•Cada registro de entrada é transformado em um INSERT
+o allowinsert
+•Atualizar as linhas se existirem na tabela
+•Inserir linhas se não existirem na tabela
+
+o A tabela precisa ser criada no SGBD antes da exportação do Sqoop
+• MySQL: create table product_recommendations (...)
+• sqoop export --connect jdbc:mysql://database/employees --username root --password secrect --export-dir /user/recommender_output --update-mode allowinsert --table product_recommendations
+
+_______________________________________________
+
+Exercícios - Sqoop –Importação para o Hive e Exportação - BD Employees
+
+1. Importar a tabela employees.titles do MySQL para o diretório /user/aluno/<nome>/data com 1 mapeador.
+Resposta: $ sqoop import --table titles --connect jdbc:mysql://database/employees --username root --password secret -m 1 --warehouse-dir /user/aluno/cicero/data
+$ hdfs dfs -ls /user/aluno/cicero/data/titles
+
+2. Importar a tabela employees.titles do MySQL para uma tabela Hive no banco de dados seu nome com 1 mapeador.
+Resposta: $ sqoop import --table titles --connect jdbc:mysql://database/employees --username root --password secret -m 1 --warehouse-dir /user/hive/cicero --hive-import --hive-table cicero.titles
+$ hdfs dfs -cat /user/hive/warehouse/cicero.db/titles/part-m-00000 | head -n 10
+
+3. Selecionar os 10 primeiros registros da tabela titles no Hive.
+Resposta: $ docker exec -it hive-server bash
+$ beeline -u jdbc:hive2://localhost:10000
+$ show databases;
+$ use cicero;
+$ show tables;
+$ select * from titles limit 10;
+
+4. Deletar os registros da tabela employees.titles do MySQL e verificar se foram apagados, através do Sqoop
+Resposta: $ sqoop eval --connect jdbc:mysql://database/employees --username root --password secret --query "truncate table titles"
+$ sqoop eval --connect jdbc:mysql://database/employees--username root --password secret --query "select * from titles limit 10"
+
+5. Exportar os dados do diretório /user/hive/warehouse/<nome>.db/data/titles para a tabela do MySQL employees.titles
+Resposta: $ sqoop export--table titles --connect jdbc:mysql://database/employees --username root --password secret --export-dir /user/aluno/cicero/data/titles
+
+6. Selecionar os 10 primeiros registros registros da tabela employees.titles do MySQL
+Resposta: $ sqoop eval --connect jdbc:mysql://database/employees --username root --password secret --query "select * from titles limit 10"
