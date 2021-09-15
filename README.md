@@ -1,5 +1,4 @@
 # Big Data Engineer - Sematix
-# Big Data Foundations
 
 ## Trilhas
 ### BIG DATA FOUNDATION
