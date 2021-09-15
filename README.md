@@ -1,7 +1,7 @@
 # Big Data Engineer - Sematix
 
 ## Trilhas
-### BIG DATA FOUNDATION [Flex Grid](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/1.%20BIG-DATA-FOUNDATION)
+### [BIG DATA FOUNDATION](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/1.%20BIG-DATA-FOUNDATION)
 - Introdução ao Big Data
 - Hadoop - HDFS | Hive | MapReduce | YARN
 - Armazenamento de dados com HDFS e HBase
