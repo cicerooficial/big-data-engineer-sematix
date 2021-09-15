@@ -8,7 +8,6 @@
 - Hive - Análise de dados
 - Sqoop - Ingestão de dados
 - Spark - Processamento de dados
-
 ### MONGODB
 - Introdução ao NoSQL com MongoDB
 - CRUD
