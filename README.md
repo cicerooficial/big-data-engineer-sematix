@@ -8,7 +8,7 @@
 - Hive - Análise de dados
 - Sqoop - Ingestão de dados
 - Spark - Processamento de dados
-### MONGODB
+### [MONGODB](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/2.%20MONGODB)
 - Introdução ao NoSQL com MongoDB
 - CRUD
 - GUI - Interface Gráfica do Usuário
