@@ -1,0 +1,25 @@
+INTRODUÇÃO - Redis (REmote DIctionary Server)
+*No Redis, necessáriamente o valor não precisar ser uma String, pois ele consegue mapear por outra String;
+*Vantagem de trabalhar com estruturas complexas;
+*Não é um BD para armazenar dados, trabalha em memória por isso as transações de comandos são rápidas;
+* Acesso Cliente-Servidor;
+* 1 Comando por vez, aguarda até o comando ser executado até o fim;
+
+
+INSTALAÇÃO Redis
+
+LOCALMENTE
+Instalação do código fonte
+Baixe, extraia e compile o Redis com:
+
+$ wget https://download.redis.io/releases/redis-6.2.5.tar.gz
+$ tar xzf redis-6.2.5.tar.gz
+$ cd redis-6.2.5
+$ make
+
+*Aconselhável utilizar instalação Docker para evitar problemas de S.O..
+
+* Instalação do Redis em ambiente Cloud para desenvolvimento e produção.
+
+
+
