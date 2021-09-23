@@ -1,0 +1,116 @@
+ATUALIZAR DOCUMENTOS
+
+Métodos de Atualizar Documentos
+
+oPrincipais métodos
+•db.<nomeCollection>.updateOne(<filtro>,<atualização>)
+•db.<nomeCollection>.updateMany(<filtro>, <atualização>)
+oFiltro é o Critério de Consulta
+•Operadores aplicados nos atributos
+•{<atributo>:{<operador>:<valor>}
+oAtualização
+•Operadores de atualização aplicados nos atributos
+ohttps://docs.mongodb.com/manual/reference/operator/update/
+•{<operadorAtualização>:{<atributo>:<valor>, <atributo>:<valor>,...}}
+
+Operador set
+•Atualizar o atributo
+•Caso o atributo não exista, é criado
+•Ex
+db.cliente.updateOne({_id: 1},{$set: {idade: 25, estado: "SP"}})
+
+oOperador unset
+•Remover o atributo
+•O valor do atributo deve ser “”
+•Para remover tudo é só não colocar o critério (_id:X). CUIDADO! É como executar um update sem where
+•Ex
+db.cliente.updateOne({_id: 1},{$unset: {idade:""}})
+
+oOperador set
+•Atualizar o atributo
+•Caso o atributo não exista, é criado
+•Ex
+db.cliente.updateMany({idade: gt: 27}},{$set: seguro_carro: "baixo"}})
+
+oOperador rename
+•Atualizar os nomes dos atributos
+•{$rename:{<nomeAtributo>: <novoNome>,<nomeAtributo2>:<novoNome2>,...}}
+•Ex
+db.cliente.updateMany{},{$rename: {"nome": "nome_completo"}})
+
+Atualizar Atributos de Date e Timestamp
+
+Documentos com data
+
+oTipos de Data e tempo
+•Date() - Retorna a data atual como string
+•new Date() - Retorna a data atual como objeto de data UTC ( ISODate )
+•new Date("<YYYY-mm-ddTHH:MM:ssZ>")
+•New Timestamp() - Retorna o timestamp atual
+oEx.
+db.test.insertOne({
+ts: new Timestamp(),
+date: new Date(),
+data_string: Date(),
+config_date: new Date("2020-08")
+});
+
+Atualizar data de Documentos
+
+oOperador currentDate
+•Setar um valor de data atual
+•{$currentDate:{<atributo>:$type:<tipo>}}
+oTipo
+   •timestamp
+   •date
+•Ex
+db.cliente.updateMany(
+  {idade:{$gt: 27}},
+  {
+    $set:{seguro_carro: "baixo"},
+    $currentDate:{atualizado:{$type: "timestamp"}}
+  }
+)
+
+Atualizar Atributos de Array
+
+oOperador set
+•Atualizar um elemento do Array
+•O elemento que deseja atualizar deve estar no Filtro
+•Operador $ atualiza o primeiro elemento da pesquisa em relação ao filtro. CUIDADO! SE NÃO COLOCAR O $ ELE ATUALIZA TODOS
+•Ex
+db.cliente.updateOne(
+  {_id: 2,"conhecimento":"Mongo"},
+  {$set:{"conhecimento.$":"MongoDB"}}
+)
+
+oOperador pull e push
+•Adicionar elemento no Array push
+•Remover elemento no Array pull
+•Ex
+db.cliente.updateOne({_id:2},{$push:{conhecimento:"Redis"}})
+db.cliente.updateOne({_id:2},{$pull:{conhecimento:"Redis"}})
+
+REMOVER DOCUMENTOS
+
+Deletar Documentos
+
+oPrincipais métodos
+•db.<nomeCollection>.deleteOne(<filtro>)
+•db.<nomeCollection>.deleteMany(<filtro>)
+
+oFiltro é o Critério de Consulta
+•Operadores aplicados nos atributos
+•{<atributo>:{<operador>:<valor>}
+
+oDeletar todos os documentos
+•db.cliente.deleteMany({})
+
+oExemplos
+•Deletar N documentos
+odb.cliente.deleteMany({status:"Inativo"})
+•Deletar um documento
+oSe a busca encontrar mais de um documento, irá deletar apenas o primeiro
+odb.cliente.deleteOne({_id:2})
+•Deletar collection
+odb.cliente.drop()

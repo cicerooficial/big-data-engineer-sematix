@@ -1,0 +1,92 @@
+Agregação de Propósito único
+
+oCount
+•Sintaxe:
+odb.<nomeCollection>.count()
+odb.<nomeCollection>.(<filtro>) = db.<nomeCollection.find({<filtro>}).count()
+•Ex.
+odb.cliente.count()
+odb.cliente.count({cidade: "São Paulo"})
+odb.cliente.find({cidade : "São Paulo"}).count()
+
+oDistinct
+•Sintaxe: db.<nomeCollection>.distinct("<atributo>")
+•Ex.: db.cliente.count({nome})
+
+oEstimatedDocumentCount
+•db.<nomeCollection>.estimatedDocumentCount()
+
+
+Agregação Match
+
+oMatch
+•Sintaxe:
+odb.<nomeCollection>.aggregate([{$match:{<query>}}])
+oExemplo:
+db.funcionarios.aggregate([{$match: {status: “Ativo" }}])
+
+Agregação Group
+
+oGroup
+•Sintaxe:
+odb.<nomeCollection>. aggregate(
+	$group:{
+	   _id: "$<atributo>",
+	   <atributoNovo>:{<accumulator1>: "$<atributoAgg>"},...}})
+oExemplo:
+db.funcionarios.aggregate(
+	{$group: {_id: "$setor", total:{$sum:"$vendas"}}})
+
+oAtributos
+•_id
+oGroup By(SQL)
+o"" All
+
+oAcumulador
+•$sum
+•avg
+•$min
+•max
+•first
+•last
+•push
+•addToSet
+•stdDevPop
+•stdDevSamp
+
+Agregação Match e Group
+
+oPipeline de agregações
+•Match e Group
+db.funcionarios.aggregate{[ 
+	{$match: {status: "Ativo"}},
+	{$group: {_id: "$setor",total: {$sum: "$vendas"}}
+])
+
+Agregação Match, Group , Sort e limit
+
+oPipeline de agregações
+•Match e Group
+db.funcionarios.aggregate{[ 
+	{$match: {status: "Ativo"}},
+	{$group: {_id: "$setor",
+		total: {$sum: "$vendas"},
+		media: {$ avg : “$vendas”}
+		quantidade: {$count :1}
+},
+{$sort :{_id: 1}},
+{$limit :10}
+])
+
+Replicação e Fragmentação dos Dados
+
+oVisualizar configuração do Replica Set
+•rs.conf()
+oVerificar o status do Replica Set
+•rs.status()
+oConfiguração
+•https://docs.mongodb.com/manual/tutorial/deploy-replica-set/
+
+Shard
+
+

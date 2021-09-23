@@ -1,0 +1,68 @@
+CRIAÇÃO BANCO DE DADOS
+
+oCriar banco de dados
+•Sintaxe
+use <nomeBD>
+oVisualizar o banco de dados conectado
+•Comando:
+db
+oPara visualizar o banco de dados é necessário incluir um documento, caso contrário ele não aparece no show db
+
+Criação Collection
+
+oCriar Collection
+•Sintaxe
+db.createCollection('<nomeCollection>')
+*Obs.: O mongoDB sempre retornará um JSON como resposta.
+
+oVisualizar Collections
+•Comando
+show collections
+
+oExcluir Collection
+•Sintaxe
+db. <nomeCollection>.drop()
+
+oExcluir Banco de dados
+•Comando
+db.dropDatabase()
+*É recomendável excluir primeiro as collections(tabelas) para depois excluir o BD.
+
+oRenomear Collection
+•Sintaxe
+db.<nomeCollection>.renameCollection('<nomeNovaCollection>')
+
+oAdicionar documentos em uma collection
+•Inserir um documento
+oSintaxe:
+db.<nomeCollection>.insertOne({<documento>})
+•Inserir N documentos ( Array
+oSintaxe:
+db.<nomeCollection>.insertMan([{<documento1>}, {<documento2>},{<documentoN>}])
+
+Visualizar Documentos
+oListar documentos da collection
+•Sintaxe:
+db.<nomeCollection>.find().pretty()
+
+____________________________________
+
+CONSULTAS BÁSICAS EM DOCUMENTOS
+
+Consulta Documentos
+
+oForma básica de consultar documentos
+•Sintaxe :
+odb.<nomeCollection>.find({<critérioConsulta>},{<projeção>})
+•Critério de Consulta
+oOperadores aplicados nos atributos
+o{<atributo>:{<operador>:<valor>}
+•Projeção
+oAtributos que são visualizados pela consulta
+o{<atributo>:0}
+•Ocultar o atributo
+o{<atributo>:1}
+•Mostrar o atributo
+
+____________________________________
+

@@ -1,0 +1,98 @@
+ÍNDICES
+
+Quando estiver pesquisando um campo e ele tiver um index associado, a bsuca fica mais eficiênte, pois o mongoDB irá diretamente fazer uma busca na estrutura que já está internamente ordenada.
+
+Por Default o MongoDB tem o atributo _id como index, assim as buscas ficam mais eficiêntes.
+
+
+Criação de Index
+db.<nomeCollection>.createIndex({<key>,<opções>})
+Key - <atributo>:<valor> (Garante exclusividade)
+Exemplos
+•Criação de index
+db.cliente.createIndex({nome:1})
+({nome:
+•Visualizar indexes
+db.cliente.getIndexes()
+
+oNome Padrão do Index
+•<atributo>_< valor>_ <atributo>_<valor>
+•Ex.
+odb.cliente.createIndex ({nome: 1, item: -1})
+•Nome do Index: nome_1_item:_-1
+odb.cliente.createIndex({nome: 1, item: 1},{name: "query itens"})
+*Obs.: Dando um nome para o Index, pode facilitar qa buscar caso você queria no futuro saber pelo nome o por que criou o index e se deve excluí-lo ou não.
+oIndex Exclusivo
+•Ex.
+odb.cliente.createIndex({user_id: 1}, {unique: true})
+odb.cliente.createIndex({user_id: 1, nome: 1},{unique: true})
+*Obs.: Por ser único, você não poderá utilizar o mesmo nome de index novamente.
+
+Excluir um Index
+•Sintaxe:
+odb.<nomeCollection>.dropIndex({<key>})
+•Ex.
+odb.cliente.dropIndex({nome: 1})
+oExcluir todos os indexes de uma collection
+•Sintaxe:
+odb.<nomeCollection>.<dropIndexes()
+•Ex.
+odb.cliente.dropIndexes()
+oAlterar um index - Não tem alteração, por ser de sintaze simples precisa Remover e criar novamente.
+
+_____________________________________________
+
+CONSULTAS COM INDEX
+
+Método Hint
+oForçar o Otimizador de consultas do MongoDB fazer uso de um índice específico
+•Sintaxe:
+odb.<nomeCollection>.find({<filtro>}).hint({<key>})
+•Ex.
+odb.cliente.find().hint({nome: 1})
+oComo confirmar se a consulta faz uso do índice?
+•Método explain
+
+oPlano de execução
+•Compreender e otimizar consultas
+•Verificar stage queryPlanner.winningPlan
+oCOLLSCAN: Collection Scan
+oIXSCAN: Scan com Index keys
+oFETCH : Recuperar documentos
+oSHARD_MERGE: Junção de shards
+oSHARDING_FILTER: Filtrar documentos
+órfãos em shards
+oEx.
+•db.cliente.find().explain()
+•db.cliente.find().hint({nome: 1}).explain()
+
+_____________________________________________
+
+CONSULTAS COM REGEX
+
+* Estudar sobre REGEX
+Método REGEX
+
+oAplicar expressão regulares nas consultas
+•Sintaxe:
+odb.<nomeCollection>.find({<field>: {$regex: /pattern/, $options: '<options>'}})
+odb.<nomeCollection>.find({<field>: {$regex: 'pattern', $options: '<options>'}})
+odb.<nomeCollection>.find({<field>: {$regex: /pattern/<options>}})
+
+oOptions
+•i - Ignorar case-sensitive
+•m - Combinar várias linhas
+o Incluir as ancoras ^ no inicio e $ no final
+
+oEx.:
+•Retornar os clientes com o nome lucas , de forma não case sensitive
+odb.cliente.find({nome: {$regex:"lucas", $options: "i"}})
+odb.cliente.find({nome: {$regex:/lucas/, $options: "i"}})
+odb.cliente.find({nome: {$regex:/lucas/i}})
+•Retornar os clientes da cidade de São Paulo, pesquisando por sao paulo
+odb.cliente.find({nome: {$regex:"s.o paulo", $options: "i"}}) *o . é um coringa pois estão com ã,a,e, etc ele irá buscar 
+•Retornar os clientes das cidades que começam com “São”
+odb.cliente.find({nome: {$regex : "^são", $options: "i"}})
+•Retornar os cpf que contenham letras
+odb.cliente.find({cpf: {$regex:"[a-z]"}})
+

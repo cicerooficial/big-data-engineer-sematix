@@ -1,0 +1,62 @@
+Preparação - Ambiente Desenvolvimento
+
+oAcessos de ferramentas
+•MongoDB
+o$ docker exec -it mongo bash
+o# mongo
+•Mongo Express (Interface gráfica)
+ohttp://localhost:8081
+
+Comandos
+Iniciar MongoDB
+•Sintaxe
+mongo --host <nomeHost> -u <usuarioRoot> -p <senhaRoot> --authenticationDatabase <bdAdmin>
+•Ex.
+mongo --host mongo -u mongoadmin -p root --authenticationDatabase admin
+mongo (Como não tem usuário e senha só digitar mongo)
+oVisualizar banco de dados
+•show dbs - Apresenta o nome e o consumo em GB dos databases
+
+________________________________
+INTRODUÇÃO - NoSQL
+Tipos de BD - SQL e NoSQL
+
+Diferente de um BD SQL, os BD NoSQL possui alto desempenhp, Arquitetura distribuída e o Schema é flexível.
+
+Existem 2 modos de escalar um Cluster.
++ Tecnologia - Mais hardware(cpu,RAM), etc.
++ Computadores - Máquinas com menos poder computacional só que em maior quantidade.
+
+Tipos de Armazenamento
+SQL
+ - Relacional (Orientado a Linha): MySQL e Oracle
+NoSQL
+ - Orientado a colunas: Cassandra
+ - Chave-valor: Redis
+ - Orientado a Grafos: neo4j
+ - Orientado a Documentos(registro): mongoBD
+*Obs.: mongoDB não tem relacionamento N-N, N-1,, etc, nem JOIN. Os Joins devem ser pensados para os documentos já estarem "relacionados".
+
+Em NoSQL o Teorema CAP diz que é impossível no armazenamento de daods distribuído garantir mais de duas das três garantias:
+- Consistency(Consistência) - Acesso aos dados
+- Availability(Disponibilidade) - O dado sempre será retornado
+- Partition Tolerance(Tolerância a Partiçaõ de Rede / Tolerância a Falhas) - Mesmo com falhas o sistema continuará funcionando
+
+______________________________________________________________
+
+INTRODUÇÃO - MongoDB
+
+Foi pensado para ser trabalhado em grande escala, na casa do Pentabyte.
+*Não é recomendável trabalhar com transação com todo o BD, somente no que for necessário
+
+BD Relacional	  X	MongoDB
+_______________________________________
+Banco de dados	|	Banco de Dados |
+Tabela		|	Coleção	       |
+Registro(Linha)	|	Documento      |
+Coluna		|	Atributo       |
+Índice		|	Índice         |
+_______________________________________|
+
+MongoDB armazena dados em formado BSON(não é JSON, JSON é a forma que usa para fazer a comunicação)
+
