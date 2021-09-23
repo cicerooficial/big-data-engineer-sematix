@@ -1,7 +1,8 @@
 # Big Data Engineer - Sematix
 
 ## Trilhas
-### <img src="https://media.badgr.com/uploads/badges/6d160c59-0aa7-42e3-859f-d6e4013f9aab.png" width="100"> [BIG DATA FOUNDATION](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/1.%20BIG-DATA-FOUNDATION) 🔄[Atualizando]
+### <img src="https://media.badgr.com/uploads/badges/6d160c59-0aa7-42e3-859f-d6e4013f9aab.png" width="70"> [BIG DATA FOUNDATION](https://badgr.com/backpack/badges/61408d1244f9c944ee8f2d15) 🔄[Atualizando]
+
 - Introdução ao Big Data
 - Hadoop - HDFS | Hive | MapReduce | YARN
 - Armazenamento de dados com HDFS e HBase
@@ -9,7 +10,7 @@
 - Sqoop - Ingestão de dados
 - Spark - Processamento de dados
 
-### <img src="https://media.badgr.com/uploads/badges/5255bd41-1608-4c10-829b-59007f6f268e.png" width="100">[MONGODB - Básico](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/2.%20MONGODB) 🔄[Atualizando]
+### <img src="https://media.badgr.com/uploads/badges/5255bd41-1608-4c10-829b-59007f6f268e.png" width="70">[MONGODB - Básico](https://badgr.com/backpack/badges/614930beb227607160e37de8) 🔄[Atualizando]
 - Introdução ao NoSQL com MongoDB e Instalação
 - CRUD | Consultas em Documentos
 - Atualizar Documentos | Remover Documentos
