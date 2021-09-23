@@ -1,0 +1,3 @@
+Docker-compose Completo
+
+mongo --host mongo -u "" -p "" --authenticationDatabase admin
