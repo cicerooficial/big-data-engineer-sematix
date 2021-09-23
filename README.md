@@ -10,12 +10,18 @@
 - Spark - Processamento de dados
 
 ### [MONGODB - Básico](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/2.%20MONGODB) 🔄[Atualizando]
-- Introdução ao NoSQL com MongoDB
-- CRUD
-- GUI - Interface Gráfica do Usuário
+- Introdução ao NoSQL com MongoDB e Instalação
+- CRUD | Consultas em Documentos
+- Atualizar Documentos | Remover Documentos
+- Otimização de Consultas | GUI - Interface Gráfica do Usuário - Docker & Oficial MongoDB
 - Agregações | Replicação e Fragmentação dos Dados | MongoDB Cloud
 
 ### [REDIS - Básico](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/3.%20REDIS)🚧[Em andamento]
+
+- Introdução ao Redis e Instalação
+- Estrutura de Dados | Strings | Listas
+- Sets | Sets Ordenados | Hashes
+- Pub/Sub | Configurações
 
 ### [KAFKA - Básico]
 
