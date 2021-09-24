@@ -1,0 +1,99 @@
+SETS
+Sets são coleções não ordenadas de Strings que expressão relações entre objetos.
+Sintaxe:
+•Criar e Adicionar elementos
+osadd <chave> <valor1> ... <valorN>
+•Retornar todos os elementos
+osmembers <chave>
+•Recuperar um elemento e remove lo do set
+ospop <chave>
+
+oVerificar se um elemento existe
+•Sintaxe: sismember <chave> <valor>
+oVisualizar o número de elementos (Contar elementos)
+•Sintaxe: scard <chave>
+oRemover um elemento
+•Sintaxe: srem <chave> <valor>
+
+Múltiplos Sets
+oInterseção de vários sets
+•Sintaxe: sinter <chave1> ... <chaveN>
+oDiferença de vários sets
+•Sintaxe: sdiff <chave1> ... <chaveN>
+* A diferença é comparada em relação a primeira chave
+oUnião de vários sets
+•Sintaxe: sunion <chave1> ... <chaveN>
+
+oTodos os comandos tem a versão para armazenar em uma nova chave
+oArmazenar os múltiplos sets em outra chave
+•Sintaxe
+osinterstore <chaveArmazenamento> <chave1> ... <chaveN>
+osdiffstore <chaveArmazenamento> <chave1> ... <chaveN>
+osunionstore <chaveArmazenamento> <chave1> ... <chaveN>
+
+SETS ORDENADOS
+
+oSorted sets(Sets Ordenados) são compostos de elementos de string únicos e não repetitivos
+•Combinação de Set e Hash
+•Também é um Set
+oCada elemento é associado a um score
+•Semelhante ao Hash
+
+oSintaxe
+•Criar e Adicionar elementos
+ozadd <chave> <score1> <valor1> ... <scoreN> <valorN>
+•Visualizar elementos em um intervalo na lista (A ordem é pelo Score)
+oCrescente zrange <chave> <inicio> <fim> withscores
+oDecrescente zrevrange <chave> <inicio> <fim> withscores
+
+oRecuperar um elemento e remove-lo do set
+oSintaxe
+•Maior score zpopmax <chave>
+•Menor score zpopmin <chave>
+
+oBloquear se o set estiver vazio até um determinado tempo t
+oSintaxe
+•Maior score - bzpopmax <chave> <t>
+•Menor score - bzpopmin <chave> <t>
+
+oVisualizar a posição de um elemento
+•Sintaxe
+ozrank <chave> <valor>
+ozrevrank <chave> <valor>
+oVisualizar o score de um elemento
+•Sintaxe: zscore <chave> <valor>
+oVisualizar o número de elementos(Contar)
+•Sintaxe: zcard <chave>
+oRemover um elemento específico
+•Sintaxe: zrem <chave> <valor>
+
+
+HASHES
+
+oHashes são pares de valor de campo
+•Muito utilizado para representar objetos
+oSintaxe
+•Definir o valor de um campo de hash
+ohmset <chave> <campo1> <valor> ...
+•Obter o valor de um campo de hash
+ohget <chave> <campo>
+•Obter os valores dos campos de hash
+ohmget <chave> <campo1> ...
+•Obter todos os campos e valores de uma hash
+ohgetall <chave>
+
+oIncrementar (ou decrementar com números negativos) valores nos campos
+•Sintaxe
+ohincrby <chave> <campo> <incremento>
+
+oObter o número de campos (Contar)
+•Sintaxe: hlen <chave>
+oObter o tamanho do valor de um campo
+•Sintaxe: hstrlen <chave> <campo>
+oObter todos os campos da hash
+•Sintaxe: hkeys <chave> <campo>
+oObter todos os valores da hash
+•Sintaxe: hvals <chave>
+oDeletar o campo
+•Sintaxe: hdel <chave> <campo>
+

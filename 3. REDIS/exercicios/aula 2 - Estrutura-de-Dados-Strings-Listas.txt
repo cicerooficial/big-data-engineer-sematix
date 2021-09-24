@@ -1,0 +1,104 @@
+ESTRUTURA DE DADOS
+Servidor de estruturas de dados que dá suporte a diferentes tipos de valores.
+Chave mapeia o valor.
+Aceita estruturas mais complexas como:
+Strings, Listas, Sets, Sets Ordenados, Hash, HyperLogLogs, Streams
+
+Chaves são sequências binárias de até 512Mb.
+Criar instancias como: object-type:id ex: user:1000. Assim facilitará a leitura.
+
+STRINGS
+Único tipo de dados Memcached (Cache para páginas Web)
+Chaves são String, assim você mapeia uma String com outra String
+
+Sintaxe
+Definir um valor de String: SET <chave> <valor>
+Recuperar um valor de String: GET <chave> <valor>
+Opções para chave String:
+NX - Falha se a chave já existir;
+XX(Default) - Substituir o valor da chave caso existir.
+
+Verificar o tamanho do valor:
+strlen <chave>
+
+String como inteiro
+incr <chave>
+decr <chave>
+Para mais ou menos de 1
+incrby <chave> <incremento>
+decrby <chave> <decremento>
+ex: set contador 10
+
+*Devido os comandos serem atômicos, caso 2 comandos de incremento forem executados, era irá realizar um após o outros, incrementando 2x.
+
+Definir e recuperar várias chaves em um comando
+MSET<chave1> <valor1> <chave2> <valor2>...<chaveN> <valorN>
+MGET<chave1> <chave2>...<chaveN>
+
+Opções básicas de chaves
+
+Verificar se a chave existe - exists<chave>
+Deletar chave - del<chave>
+Tipo da chave - type<chave>
+
+Persistência de Chaves
+oexpire <chave> <tempo segundos>
+opexpire <chave> <tempo milissegundos>
+oset <chave> <valor> ex <tempo segundos>
+oset <chave> <valor> px <tempo milissegundos>
+oVerificar o tempo restante de vida da chave
+•Sintaxe
+ottl <chave> (reposta em segundos)
+opttl <chave> (reposta em milissegundos>
+
+* -1: É quando sua chave está persistida sempre 
+* -2: É quando sua chave não existe
+
+Remover tempo para a chave expirar
+persist <chave>
+
+LISTAS
+
+O redis incrementa uma lista de Linked List que tempo uma vantagem por ter tempo constanto para qualquer inserção. Isso é ótimo para escalabilidade.
+
+As listas no Redis só podem ser inseridas da esquerda para direita ou da dieria para esquerda
+_______________
+|L |...|...|R |
+|__|___|___|__|
+|0 | 1 |...|N |
+______________|
+
+Implementar elementos na lista
+Sintaxe:
+No início(esquerda) da lista
+LPUSH <chave><valor>
+No final(direita) da lista
+RPUSH <chave><valor>
+
+Extrair elementos em um intervalo da lista
+LRANGE<chave><valor><fim>
+* A lista inicia em 0;
+* -1 último, -2 penúltimo, -3 antipenúlitmo...*.
+
+Recuperar um elemento e eliminá-lo da lista
+Sintaxe:
+No início(esquerda) da lista
+LPOP <chave>
+No final(direita) da lista
+RPOP <chave>
+Retornar NULL quando não existir elementos
+
+Para bloquear se a lista estiver vazia até o tempo especificado, evitando respostas Null.
+Sintaxe:
+No início(esquerda) da lista
+BLPUSH <chave> <tempo> - Implementa uma fila no início(esquerda)
+No final(direita) da lista
+BRPOP <chave> <tempo> - Implementa uma fila no final(direita)
+
+Definir um novo intervalo para a lista
+LTRIM <chave> <novoinício> <novofim>
+*Remove todos os elementos fora do intervalo
+
+Visualizar o tamanho da lista
+LLEN <chave>
+

@@ -1,0 +1,59 @@
+Exercícios - Pub/Sub
+
+1. Criar um assinante para receber as mensagens do canal noticias:sp
+//Terminal SUB
+$ subscribe noticias:sp
+
+2. Criar um editor para enviar as seguintes mensagens no canal noticias:sp
+Msg 1
+Msg 2
+Msg 3
+//Terminal PUB
+$ publish noticias:sp "Msg 1"
+$ publish noticias:sp "Msg 2"
+$ publish noticias:sp "Msg 3"
+
+3. Cancelar o assinante do canal noticias:sp
+//Terminal SUB
+$ unsubscribe
+$ CRTL+C
+
+4. Criar um assinante para receber as mensagens dos canais com o padrão noticias:*
+//Terminal SUB
+$ subscribe noticias:*
+
+5. Criar um editor para enviar as seguintes mensagens no canal noticias:rj
+Msg 4
+Msg 5
+Msg 6
+//Terminal PUB
+$ publish noticias:rj "Msg 4"
+$ publish noticias:rj "Msg 5"
+$ publish noticias:rj "Msg 6"
+
+_______________________________________________________
+
+Exercícios - Configuração
+
+1. Visualizar todos os parâmetros de configuração
+$ config get *
+
+2. Verificar o parâmetro “appendonly”
+$ config get appendonly
+
+3. Remover a persistência dos dados, alterando o parâmetro “appendonly” para “no”
+$ config set appendonly no
+
+4. Verificar o parâmetro “save”
+$ config get save
+
+5. Adicionar a persistência dos dados, para a cada 2 minutos (120 segundos) se pelo menos 500 chaves forem alteradas, adicionando o parâmetro “save” para “120 500”
+$ config set save "120 500"
+
+6. Verificar os parâmetros “maxmemory*”
+$ config get maxmemory*
+
+7. Permitir que o Redis remova automaticamente os dados antigos à medida
+que você adiciona novos dados, com uso da politica “allkeys-lru”, quando chegar a 1mb de memória.
+$ config get maxmemory-policy allkeys-lru
+$ config get maxmemory 1mb 
