@@ -17,14 +17,14 @@
 - Otimização de Consultas | GUI - Interface Gráfica do Usuário - Docker & Oficial MongoDB
 - Agregações | Replicação e Fragmentação dos Dados | MongoDB Cloud
 
-### [REDIS - Básico](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/3.%20REDIS)🚧[Em andamento]
+### <img src="https://media.badgr.com/uploads/badges/assertion-pV221MkNT4KLrB1IsjeX6A.png" width="70"><a href="https://badgr.com/backpack/badges/6152432f6a66fb26fd181c4d" target="_blank"> REDIS - Básico </a>
 
 - Introdução ao Redis e Instalação
 - Estrutura de Dados | Strings | Listas
 - Sets | Sets Ordenados | Hashes
 - Pub/Sub | Configurações
 
-### [KAFKA - Básico]
+### [KAFKA - Básico] 🚧[Em andamento]
 
 ### [ELASTIC - Essencial I]
 
