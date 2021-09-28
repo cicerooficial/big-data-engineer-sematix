@@ -26,6 +26,9 @@
 
 ### [KAFKA - Básico] 🚧[Em andamento]
 
+- Introdução ao Kafka e Instalação
+- Arquitetura Kafka - Conceitos | Kafka por linha de comando
+
 ### [ELASTIC - Essencial I]
 
 ### [SPARK - Big Data Processing]
