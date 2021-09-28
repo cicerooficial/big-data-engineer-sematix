@@ -1,0 +1,5 @@
+https://redis.io/clients
+
+https://cloud.google.com/community/tutorials/pubsub-workflow
+
+https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/elasticache-use-cases.html
