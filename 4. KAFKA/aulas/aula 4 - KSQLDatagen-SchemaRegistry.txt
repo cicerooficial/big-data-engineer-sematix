@@ -1,0 +1,210 @@
+KSQL DATAGEN
+oFerramenta de CLI para Gerar dados de teste para testar ambientes de desenvolvimento
+
+oTestes
+•Diferentes tópicos
+oorders, users, pageviews
+•Diferentes formatos
+oavro, json, delimited(, csv)
+•Controlar a produção de mensagens para saber como está a arquitetura
+oQuantidade
+oTaxa/s
+*Diferencial do Datagen é fazer consultas enquando está produzindo dados.
+
+oAcessar por Container
+$docker exec -it ksql-datagen bash
+$ksql-datagen <argumentos> ou <atributos>
+oEx.: $ksql-datagen help
+
+Argumentos - Default
+help
+bootstrap-server = Especificar quem é o Brocker padrão local localhost:9092
+quickstart = Especificar qual dado receberá do tópico
+schema = Especificar um schema avro
+schemaRegistryUrl = 
+key-format = Definir o formato da chave
+value-format = Definir o formato do valor da chave
+topic = Especificar um tópico para ser criar
+key = Campo que será a chave
+iterations = Quantas mensagens que irá receber. Se não colocar nada ele irá ficar produzindo dados
+propertiesFile = Configurar um arquivo de propriedade do client
+nThreads = Especificar quantas Threads(produtores) irá inicializar para testar sua estabilidade
+msgRate = Controlar a quantidade de mensagens enviadas por segundo
+printRows = True/False para definir se quer visualizar as linhas
+
+Datagen - Propriedades para se trabalhar com containers
+Arquitetura Docker Host (local)
+ohttps://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
+
+*Na propriedade advertised.listener pode-se configurar outros ouvintes, pois, diferente da comunicação com o broker local (localhost:9092) o container, em vez de voltar a escuta para ele mesmo, saberá quais são os outros ouvintes para serem acessados, ex: host.docker.internal:19092
+
+oArgumentos Cluster em Docker
+•$ ksql-datagen \
+**bootstrap-server=broker:29092(este é a porta que está configurado no arquivo docker-compose.yml) \
+**quickstart=<orders,users,pageviews> *(Qual tipo de dado do tópico que fará uso)\
+schema=<ArquivoAvro> *(Não é obrigatório, só se existir)\
+schemaRegistryUrl=schema-registry:8081 (É sempre recomendável incluir quem(serviço) o schemRegistry fará uso)\
+key-format=<avro,json, Kafka ou delimited> *(Se tiver chave)\
+value-format=<avro,json ou delimited> *(Boa prática definir)\
+**topic=<nomeTopico> *(Nome do tópico que fará uso)\
+key=<campoChave> *(Não obrigatório)\
+iterations=<númeroLinhas> *(Não obrigatório)\
+msgRate=<TaxaMsg/segundos> *(Não obrigatório)\
+
+ocat docker-compose.yml
+...
+broker:
+...
+environment
+kafka_listener_security_protocol_map:
+plaintext:plaintext,
+plaintext_host:plaintext
+kafka_advertised_listeners:
+plaintext://broker:29092,
+plaintext_host://localhost:9092
+
+Exemplo KSQL Datagen para Stream
+*Não precisar criar o tópico com kafka tópic, pois quando for produzir o dado com o datagen irá gerar automaticamente o tópico, conforme abaixo com o comando topic.
+
+oCriação de dados no tópico orders_topic. 
+*Abrir em um terminal separado
+$ksql-datagen bootstrap-server=broker:29092 schemaRegistryUrl=schema-registry:8081 quickstart=orders topic=orders_topic
+
+INFO
+AvroDataConfig values:
+ schemas.cache.config = 1
+ enhanced.avro.schema.support = false
+ connect.meta.data = true
+
+0----> ([ 1515722137194 | 0 | 'Item_975' | 3.492080368535175 | Struct city =City_53,state=State_56,zipcode=20946} ])
+ts:1566309102570
+1----> ([ 1504020399494 | 1 | 'Item_696' | 1.3494102846621505 | Struct city =City_13,state=State_42,zipcode=55583} ])
+ts:1566309102926
+2----> ([ 1490789383235 | 2 | 'Item_211' | 0.6351559561132624 | Struct city =City_29,state=State_53,zipcode=37622} ])
+ts:1566309103186
+*ts = TimeStamp
+
+oVisualizar dados no tópico orders_topic. 
+*Abrir em outro terminal separado ou no ControlCenter
+ksql> print "orders_topic"
+
+Saida:
+{"ROWTIME ": ROWKEY ":" ordertime ": orderid ": itemid ":"Item_ orderunits ": address":{"city ":"City_ state ":"State_ zipcode ":61704}}
+
+oCriação de Stream
+CREATE STREAM orders_filtrada (orderid INT, orderunits DOUBLE, address STRUCT<city VARCHAR, zipcode INT>, ordertime VARCHAR) WITH (KAFKA_TOPIC='orders_topic', VALUE_FORMAT='JSON');
+*Não é obrigatório utilizar todos os campos, apenas o que deseja mapear
+oVisualização de dados Steam
+ksql> select * from orders_filtrada;
+1566310467604 | 5434 | 5434 | 1.8955618733499244 | {CITY=City_83, ZIPCODE=61609} | 1509277499165
+1566310467937 | 5435 | 5435 | 0.5909432198422736 | {CITY=City_66, ZIPCODE=11024} | 1501173885894
+1566310468359 | 5436 | 5436 | 1.7487481852807258 | {CITY=City_13, ZIPCODE=41065} | 1491958709551
+
+_________________________________________
+
+SCHEMA REGISTRY
+
+Schema Registry é uma camada de armazenamento distribuído para esquema avro. Sempre que for usar avro, utiliza-se schema registry.
+
+oMecanismo de armazenamento subjacente do Kafka
+•*Sempre vai atribuir um id esclusivo para cada schema registrado.
+oArmazenamento e recuperação do esquema para produtores e consumidores
+oDiminuir a payload dos dados enviados para o Kafka
+
+Operações
+oOperações são feitas através de API REST
+oOperações com os esquemas
+•Adicionar schemas
+•Recuperar schemas
+•Atualizar schemas
+•Deletar schemas
+
+Formato Avro é uma Estrutura de serialização de dados, Escrito em Json de Formato binário compacto.
+
+oVantagens
+•Dados digitados todo schema em um único arquivo
+oDados comprimidos automaticamente
+•Usar avro tools para ler os dados, ou kafka como consumer
+•Documentação é embarcada no esquema
+•Suportado pelo Hadoop e diversas linguagens
+•Evolução do esquema ao longo do tempo de forma segura
+
+Estrutura
+oArmazena o esquema através de JSON
+oCampos padrões:
+•Name : Nome do esquema
+•Type : Tipo do esquema
+•Kafka Key: Sempre usar o tipo de gravação record
+•Namespace : Equivalente ao package em java
+•Doc : Documentação do esquema (para que ser o arquivo)
+•Aliasses: Outros nomes para o esquema
+•Fields
+oName : Nome do campo
+oDoc : Documentação do campo
+oType : Tipo do campo
+oDefault: Valor padão para o campo
+
+Exemplo
+Campos: Id, nome, status
+*Obs.: Quando for produzir dados o arquivo irá junto, no esquema restore terá um id associado, onde o kafka irá manda o id com os dados, uma única vez, depois só ficará enviando os dados.
+Arquivo: nomes.avsc ou nomes.avro
+{
+	"type": "record",
+	"Name": "nomes",
+	"Namespace": "example.avro", *(O nome pode ser outro)
+	"Doc": "Exemplo de um esquema"
+	"Fields": [
+		{"name": "id", "type": "int"}, *(obrigatório somente o name e type)
+		{"name": "nome", "type": string},
+		{"name": "status", "type": "boolean", "default": true}
+	]
+}
+
+Avro Console Consumer
+
+oPermitir o consumo de dados do Kafka pelo terminal de forma mais simples
+•Não mostra todos os dados se usar kafka console consumer.
+oMas não poderá ver o executável se tentar executar no broker. É preciso acessar o container do schema registry.
+
+$ docker exec -it schema-registry bash
+
+oEx. Comando
+kafka-avro-console-consumer 
+sudo kafka-avro-console-consumer *(Se estiver utilizando instalação local)
+--topic test-avro
+--bootstrap-server broker:29092
+--property schema.registry.url=http://localhost:8081
+--from-beginning
+
+Avro Console Producer
+
+oAvro Console Producer permitir o envio rápido de dados para o Kafka manualmente
+•Especificando o esquema no argumento
+oEx. Comando:
+$kafka-avro-console-producer
+--broker-list broker:29092
+--topic test-avro
+--property schema.registry.url=http://localhost:8081
+--property value.schema='{"type": "record","name":"myrecord","fields":[{"name":id","type":"int"},{"name":"nome","type":"string"}]}'
+
+{"id":1,"nome":"Rodrigo"}
+{"id":2,"nome":"Augusto"}
+
+oEvoluir o esquema
+•Necessário colocar o campo default
+$sudo kafka-avro-console-producer --broker-list broker:29092 --topic test-avro --property
+schema.registry.url=http://localhost:8081 --property value.schema'={"type": "record","name":"myrecord","fields":[{"name":id","type":"int"},{"name":"nome","type":"string"},{"name":"cidade","type":"string","default":"null"}]}'
+
+{"id":3,"nome":"Ana","cidade":"sp"}
+{"id":4,"nome":"Marcos","cidade":"sp"}
+
+Stream de Dados Avro
+
+Criar Stream para formato Avro
+oO esquema já está no tópico Kafka
+•Quando definir os atributos no Schema Registry o Avro já tem os Dados separados do Esquema. Não precisa definir todos os atributos, pois já foi definido e o Avro já tem essas configurações.
+oPrecisa apenas configurar as propriedades do Stream
+oEx. comando
+Ksql> create stream str_test-avro with (Kafka_topic='test-avro', value_format='avro');
+
+
