@@ -28,6 +28,9 @@
 
 - Introdução ao Kafka e Instalação
 - Arquitetura Kafka - Conceitos | Kafka por linha de comando
+- Control Center | KSQL
+- KSQL Datagen | Schema Registry 
+- Kafka Connect e Clients | Cloud | Configurações e Boas Práticas
 
 ### [ELASTIC - Essencial I]
 
