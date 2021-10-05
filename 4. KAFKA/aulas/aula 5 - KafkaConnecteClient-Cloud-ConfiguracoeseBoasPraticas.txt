@@ -1,0 +1,205 @@
+Kafka Connect
+o É um componente open source do Kafka onde você tem Estrutura para conectar o Kafka a sistemas externos como:
+•Bancos de dados
+•Índices de pesquisa
+•Sistemas de arquivo
+
+oPrincipais tipos de conectores
+•Source Connector(Produtor) : Enviar dados do sistema externo para os tópicos do Kafka
+•Sink Connector(Consummer) : Enviar os dados do tópico Kafka para o sistema externo
+
+oExecução
+•Processo autônomo para executar tarefas em uma única máquina
+•Serviço distribuído, escalável e tolerante a falhas
+
+Confluent Hub
+
+oRepositório de conectores da Confluent
+•https://www.confluent.io/hub/
+
+oInstalar componentes
+•docker exec -it connect bash
+•confluent-hub install <componente>
+
+Como adicionar conector
+
+Dentro do Control Center (Confluent)
+Ir em Connect. 
+*Obs.: Se não tiver nenhum conector já instalado, ir em add connector.
+
+Selecionar o seu conector e clicar em Conect
+
+Propriedades obrigatórias:
+name, kafka-topic e quickstart.
+*Obs.: Em add a Propriety pode adicionar outros propriedades.
+Depois de configurado, só ir clicar em accept e poderá baixar o arquivo de config para distribuir para outras máquinas/servidores, caso for necessário, ou para backup.
+
+Para finalizar, clicar em Lauch para executar.
+
+Kafka Clients
+
+Outra forma de enviar e receber dados pelo kafka.
+oBibliotecas de clientes para várias linguagens
+•C/C++
+•Go
+•Java
+•.NET
+•Python
+
+É possível:
+oFornecem acesso de baixo nível ao Apache Kafka
+oProcessamento stream em alto nível
+
+oVisualização das características para cada linguagem:
+•https://docs.confluent.io/5.2.2/clients/
+oExemplo de outras linguagens
+•https://docs.confluent.io/5.5.2/tutorials/examples/clients/docs/clients-all-examples.html#clients-all-examples
+
+Confluent Cloud
+É a Cloud disponível pela própria confluent
+•http://www.confluent.io/confluent-cloud
+
+
+
+•Cluster Exemplo 1
+oEntrada de dados: 100 GB - $ 11,00
+oSaída de dados: 200 GB   - $ 22,00
+oArmazenamento: 500 GBX$0,10    - $ 50,00
+oNuvem: Google Cloud      - $ 0.11 = $83,00
+
+•Cluster Exemplo 2
+oEntrada de dados: Taxa de transferência 1 MB/s - $ 278.41
+oSaída de dados: Taxa de transferência 1 MB/s   - $ 278.41
+oArmazenamento: Política de retenção de 7 dias$0,10  - $ 177,20
+oNuvem: Google Cloud                            - $ 0.11 = $734,02
+
+Converter em Mb/s para Gb/s
+1Mb/s X 60s - 60Mb/s
+60Mb/s x 60min(1hora) - 3.600Mb/s- 3,5Gb
+3.600Mb/s X 24h(1dia) - 86,400Gb
+86,400Gb X 30d(dias) - 2.592.000Mb/s - 2.531.25Gbx$0,11 = $278.437,50
+
+Política de retenção 7 dias
+86,400Mb/s X 7 - 604.800Mb/s - 590.63Gb 
+590.63Gb X 3rep(réplicas 1 leader, + 2 réplicas) = 1.771,89Gbx$0,11 = $
+177,20
+
+
+Kafka Consumidor Parâmetros importantes
+Obs.: 
+1. Indicado extressar o kafka para fazer os teste no desenvolvimento, pois as vezes você configura a latencia, mas ela já está ok e seu problema é outro.
+2. Pode consumir dados das réplicas também em vez de só o leader.
+
+ogroup.id Nome do grupo de consumo
+oauto.offset.reset Indica o que o Kafka fará quando não temos um offset inicial (padrão latest
+•earliest
+•latest
+oenable.auto.commit Indica se o commit do offset será automático. (padrão true
+omax.poll.interval.ms Intervalo máximo de busca de dados. (padrão 5 minutos)
+omax.poll.records Máximo de mensagens que são retornadas no poll (padrão
+ofetch.max.bytes Quantidade de dados que “capturadas” em cada poll (padrão 52
+olinger.ms Tempo de envio (padrão 0)
+oacks Confirmação de gravação (padrão 1)
+oretries Tentativas (padrão 2147483647)
+ocompression.type Tipo de compressão (padrão none
+omax.in.flight.requests.per.connection Mensagens em voo (padrão 5)
+
+Kafka Tipos de otimização
+
+Throughput
+oProdutor
+olinger.ms: aumente para 10-100 ( padrão 0)
+ocompression.type=lz4 padrão none)
+oacks=1 ( padrão 1)
+oretries=0 ( padrão 0)
+obatch.size : aumente para 100000-200000 ( padrão 16384)
+oConsumidor
+ofetch.min.bytes: aumente para ~100000 (default 1)
+
+Latência
+oProdutor
+olinger.ms=0 ( padrão 0)
+ocompression.type =none padrão none)
+oacks=1 ( padrão 1)
+oConsumidor
+ofetch.min.bytes =1 (padrão
+
+Disponibilidade
+oProdutor
+oreplication.factor: 3
+oacks=all ( padrão 1)
+oretries: 1 ou mais padrão 0)
+omax.in.flight.requests.per.connection=1 padrão 5)
+oPrevinir mensagens fora de ordem
+oConsumidor
+oenable.auto.commit=false padrão true)
+oBroker
+odefault.replication.factor=3 (padrão 1)
+oauto.create.topics.enable=false (padrão true )
+omin.insync.replicas=2 (default 1);
+ounclean.leader.election.enable=false (default true )
+
+Durabilidade
+oBroker
+ounclean.leader.election.enable true (default true );
+omin.insync.replicas=1 (default 1);
+odefault.replication.factor=3 (padrão
+oConsumidor
+osession.timeout.ms: Baixar o quanto possivel (default 10000)
+
+Documento para fazer otimização Kafka em desenvolvimento
+https://confluent.io/wp-content/uploads/Optimizing-Your-Apache-Kafka-Deployment-1.pdf
+
+
+Melhores Práticas
+Número de partições:
+oSempre Partições múltiplo do número de brokers. Ex: 3 para 3.
+
+Quantidade de partições:
+oPara determinar o número de partições
+oThroughput você quer atingir
+oQuanto cada partição entrega
+oComandos
+kafka-consumer-perf-test.sh
+kafka-producer-perf-test.sh
+kafka-run-class.sh kafka.tools.TestEndToEndLatency
+
+Balanceamento das partições:
+oImportante entender o comportamento dos seus
+dados
+•Manter uma uniformidade de crescimento
+entre as partições.
+
+Tempo de retenção:
+oManter partições com 25GB
+•Facilitar o gerenciamento
+oO tempo de retenção do Kafka
+•SLA(contrato) da aplicação
+•Necessidade de reprocessamento
+•Regra de negócio / Compliance
+
+Criptografia e compressão:
+• A própria Conluent indica não aplicar compressão ou criptografia no disco do broker
+• Aplique a compressão ou criptografia na mensagem
+
+Utilizar o Monitoramento do Kafka para verificar:
+Utilização de Disco
+Utilização de CPU
+I/O de Rede
+Utilização de Memória
+I/O de Disco
+Arquivos abertos
+
+Estudo Adicional para Melhorar o aprendizado
+
+oLeitura do Livro
+•Kafka: The Definitive Guide
+oLink
+•https://www.confluent.io/resources/kafka-the-definitive-guide
+
+oGithub da Confluent que disponibiliza vários exemplos de criação de aplicações.
+•https://github.com/confluentinc
+
+Confluent Global Training
+•https://confluent/training
+
