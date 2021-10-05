@@ -1,0 +1,102 @@
+Arquitetura Kafka
+
+Tópicos - Responsável por receber os flucos de registro.
+São dividos em partições são chamadas de offset(id de cada partição).
+*Segue uma sequência ordenada iniciando do 0 e é imutável.
+*Pode haver 0, 1 ou N leitores de tópicos.
+
+Broker é chamado de corretor ou servidor. 
+*Pode haver um cluster Kafka com apenas 1 servidor para ambiente dev., para ambiente de prod. é indicado no mínimo 3 brokers.
+*Cada broker tem id único.
+
+Boas práticas.
+*Sempre colocar as particições pelo número de brokers existentes. Ex: 3-3. 
+*1 brocker como Leader.
+
+Producers (Produtores/Publicadores)
+Responsáveis por enviar(publicar) dados(tópicos) para as partições.
+
+Confirmação de escrita
+oExistem 3 tipos de confirmação de escrita (acks) para o produtor
+o 0 Sem confirmação de escrita
+o 1 Garante a confirmação de escrita no líder (Padrão)
+o All Confirmação de escrita no líder e nas replicas (ISR)
+
+Consumers (Consumidores)
+Responsáveis por receber(consumir) dados(tópicos) das partições.
+
+_________________________________________________________________
+
+Gerenciar Tópicos
+
+Acessar Broker Container
+oComandos para acessar o Servidor Kafka
+•docker exec it broker bash
+
+// Comando para iniciar 
+$ kafka-topics
+
+Verificar versão
+$ kafka-topics --version
+
+Tópicos Comandos Básicos
+
+oListar tópicos
+$ kafka-topics --<servidorBroker> <endereço servidor bro ker> --list
+$ kafka-topics --bootstrap-server localhost:9092 --list
+ou
+$ kafka-topics --zookeeper localhost:2181 --list
+*Pode acontecer que algum cluster fazer o uso do zookeeper como servidor de tópico.
+
+oCriar tópico
+$ kafka-topics --bootstrap-server localhost:9092 --topic <nomeTópico> --create --partitions 3 --replication-factor 1
+*Podem ter várias partições
+*Fator de replicação no mínimo 1 que é o broker líder(não quer dizer que se cria um réplica)
+
+oDescrever tópico
+$ kafka-topics --bootstrap-server localhost:9092 --topic <nomeTópico> --describe
+
+oDeletar tópico
+$ kafka-topics --bootstrap-server localhost:9092 --topic <nomeTópico> --delete
+
+_________________________________________________________________
+
+Produtor Console
+oEnviar dados
+$ kafka-console-producer --broker-list localhost:9092 --topic <nomeTópico>
+
+oEnviar dados para todos reconhecerem ( Leader e ISR)
+$ kafka-console-producer --broker-list localhost:9092 --topic <nomeTópico> --producer-property acks=all
+
+_________________________________________________________________
+
+Consumidor Console
+
+oReceber mensagens em tempo real
+$ kafka-console-consumer --bootstrap-server localhost:9092 --topic <nomeTópico>
+
+oReceber mensagens desde a criação do tópico
+$ kafka-console-consumer --bootstrap-server localhost:9092 --topic <nomeTópico> --from-beginning
+*Cuidado, se for realizado 10Gb de mensagens ele irá carregar tudo.
+
+oCriar grupo de consumidores
+$ kafka-console-consumer --bootstrap-server localhost:9092 --topic <nomeTópico> --group <nomeGrupo>
+*Pode abrir 3 telas com o mesmo nome de grupo para consumirem o mesmo tópico
+
+Grupos de consumidores Console
+
+oListar grupos
+$ kafka-consumer-groups --bootstrap-server localhost:9092 --list
+
+oDescrever grupo
+$ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group <nomeGrupo>
+
+oRedefinir o deslocamento do mais antigo (Ler desde o início)
+$ kafka-consumer-groups --bootstrap-server localhost:9092 --group <nomeGrupo>
+--reset-offsets --to-earliest --execute --topic <nomeTópico>
+
+oAlterar o deslocamento (Se não quiser desde o início especificar o deslocamento)
+$ kafka-consumer-groups --bootstrap-server localhost:9092 --group <nomeGrupo> --reset-offsets --shift-by 2 --execute --topic <nomeTópico>
+*--shift-by 2 ele irá pular 2 offsets para realizar a leitura. Ex: Se tiver no offset 10, irá para o offset 12. Se fosse -2 negativo iria para o offset 8.
+
+
