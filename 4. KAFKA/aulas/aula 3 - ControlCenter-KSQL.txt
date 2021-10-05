@@ -1,0 +1,223 @@
+CONTROL CENTER
+*Interface para fazer monitoramento e gerencialmento do CLuster de Kafka
+
+•Funções de Monitoramento
+oBrokers
+oTópicos
+oGrupos de consumidores
+oFluxo de dados
+•Funções de Gerenciamento
+oConectores
+oCluster
+oTópicos
+•Criação de alertas
+•Desenvolvimento em KSQL
+
+Criação de tópicos
+*Obs.: Caso estiver usando o Confluent Community, deve-se utilizar os comandos abaixo para criação de tópicos
+•Kafka CLI
+<path-confluent>/bin/kafka-topics --create --bootstrap-server localhost:9092 --replication factor- 1 --partitions 1 --topic users
+•Instalar Kafka Connect Datagen
+<path-to-confluent>/bin/confluent-hub install --no-prompt confluentinc/kafka-connect-datagen:latest
+
+oConfluent Plataform
+•Control Center: http://localhost:9021/
+
+Configurações Tópicos
+oConfiguração simples
+•Nome
+•Partição
+oOutras configurações
+•Availability (Disponibilidade Alta ou baixa)
+•Cleanup policy
+oPolítica para limpar
+•Deletar ou Compactar
+oExecução (Programar politica de limpeza)
+•Tempo
+•Tamanho
+•Message size
+oTamanho máximo da mensagem
+
+oDisponibilidade
+•Máxima
+oFator de Replicação 3 (Boa prática)
+oMínimo de Replicas de sincronização 1 (Mínimo deve ter 1)
+•Equilibrada
+oFator de Replicação 3
+oMínimo de Replicas de sincronização 2
+•Moderada
+oFator de Replicação 2
+oMínimo de Replicas de sincronização 1
+•Baixa (Não usar em produção)
+oFator de Replicação 1
+oMínimo de Replicas de sincronização 1
+
+Criação de tópicos
+oCluster /Topics/ + Add a topic
+Configurações de Cluster
+oCluster /Cluster settings/Kafka
+*Só muda o nome. O host só configura pelo arquivo .yml
+Configurações de Broker
+Cluster /Cluster settings/Brokers
+
+KLSQL
+
+Conceitos
+oEngine de Streaming SQL do Kafka
+oInterface SQL interativa
+•Facilidade de uso
+•Focada para o processamento streaming no Kafka
+•Sem a necessidade de escrever código em Java ou Python
+É possível construir o cluster de forma: Escalável, Tolerante a falhas e Tempo real
+
+oSuporta várias operações de streaming
+•Filtragem de dados
+•Transformações
+•Agregações
+
+Como acessar o KSQL
+oTerminal
+•docker exec -it ksqldb-cli bash
+•ksql
+
+oUI - ControlCenter
+•ksqlDB -> ksqldb1: Começar a escrever suas querys
+
+oVisualizar tópicos
+•ksql> list topics;
+oMostrar conteúdo do tópico em tempo real
+•ksql> print "<nomeTopico>" <propriedades>;
+•Propriedades
+ofrom beginning
+ointerval
+olimit
+•Ex.: ksql> print "topic-produto" from beginning interval 5 limit 10;
+
+KSQL Stream
+*Sequencia de dados estruturados
+
+oCaracterísticas
+•Imutáveis
+**oApenas pode inserir dados, não atualizar ou excluir
+•Podem ser criados a partir de um tópico do Kafka ou derivados de um stream existente
+oFornecer o formato dos valores armazenados no tópico
+oNão inferi o formato de dados do tópico. (Você precisar configurar o tipo de dado a ser recebido)
+oComando para visualizar Streams
+•Ksql> list streams;
+
+Criação Stream
+oCriar Stream
+•Ksql> create stream <nomeStream>(<campo> <tipo>, ..., <campo> <tipo>) with (Kafka_topic='<nomeTopic>', value_format='<formato>', KEY='<campoChave>', TIMESTAMP='<campoTimestamp> ...');
+•Formato
+oDELIMITED (, CSV)
+oJSON
+oAVRO
+
+Tipos de dados
+oBOOLEAN
+oINTEGER ou INT
+oBIGINT
+oDOUBLE
+oVARCHAR ou STRING
+oArray
+oMap
+oStruct
+
+Exemplos Criação de Stream
+oTópico CSV
+•Informação do tópico cadastro
+oRodrigo, São José dos Campos
+oAugusto, São Paulo
+•Criar tópico
+Ksql> create stream cad_str_csv(nome varchar, cidade varchar) with (Kafka_topic='cadastro',
+value_format='delimited');
+
+oTópico Json
+•Informação do tópico cadastrojson
+o{"nome":"Rodrigo", "cidade":"São José dos campos"}
+o{"nome":"Rodrigo", "cidade":"São Paulo"}
+•Criar tópico
+Ksql> create stream cad_str_json(nome varchar, cidade varchar) with (Kafka_topic='cadastrojson',value_format='json');
+
+oAlterar formato de serialização de CSV/Json para Avro
+* NO formado AVRO você consegue trabalhar os dados da estrutura/Schema
+•Criar um Stream no formato avro que cria um novo tópico com os dados do stream no formato csv json
+•Ex. CSV para Avro
+Ksql> create stream cad_avro_csv with (kafka_topic ='cadastro-avro', value_format 'avro') as select * from cad_str_csv;
+•Ex. Json para Avro
+Ksql> create stream cad_str_json with (kafka_topic ='cadastro-avro', value_format 'avro') as select * from cad_str_json;
+
+Comandos Stream
+SELECT
+select_expr [,...]
+FROM from_item
+[ LEFT JOIN join_table ON join_criteria ]
+[ WINDOW window_expression ]
+[ WHERE condition ]
+[ GROUP BY grouping_expression ]
+[ HAVING having_expression ]
+[ LIMIT count ];
+
+Visualização
+oVisualizar conteúdo do Stream
+•Ksql> select <campo>, ...<campo> from <nomeStream>
+•Ex.:
+Ksql> select nome from cad_str;
+Ksql> select * from cad_str limit 10;
+oVisualizar a estrutura do Stream
+•Ksql> describe <nomeStream>
+•Ksql> describe extended <nomeStream>
+
+Setar propriedades
+
+oSetar propriedades
+•Ksql > set <propriedade> = <valor>
+oDesfazer propriedades
+•Ksql > unset <propriedade> = <valor>
+oEx.
+•Setar para visualizar os dados desde o início
+oKsql > set 'auto.offset.reset'='earliest';
+•Desfazer configuração
+oKsql > unset 'auto.offset.reset';
+
+Inserção
+oInserção
+insert into <stream_name|table_name>(column_name>,<...>)values(<value>, '<value>',<...>);
+insert into stream_name
+select select_expr [., ...]
+from from_stream
+[ where condition ]
+[ partition by column_name];
+•Ex.:
+•Ksql> insert into foo (rowtime, rowkey, key_col, col_a) values (1234,'key','key','a');
+
+Exclusão
+oDeletar uma Stream
+•ksql > drop stream <nomeStream>;
+oDeletar uma Stream e seu tópico
+•ksql > drop stream <nomeStream> delete <topic>;
+•ksql > drop stream if exists <nomeStream> delete <topic>;
+
+Agregações
+
+oagregações
+•count
+•max
+•min
+•sum
+•topk
+•topkdistinct
+
+oContar a quantidade de linhas de um campo Stream
+•Ksql> count(*) from <nomeStream>;
+oErro, precisa fazer agregação
+•Ksql> select <campo> count(*) from <nomeStream> group by <campo>;
+•Ex.:
+Ksql> select cidade, count (*) from cad_str group by cidade;
+
+oContar a quantidade de linhas de todo o tópico
+•O count sempre precisa do group by
+oCriar um campo setado para 1 em todos os registros
+•Comando
+ksql> CREATE STREAM <novoStream> AS SELECT 1 AS unit FROM <nomeSteamParaContar>;
+select count(unit) from <novoStream> group by unit;
