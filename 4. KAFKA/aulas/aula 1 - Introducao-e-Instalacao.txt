@@ -1,0 +1,57 @@
+KAFKA é uma Plataforma de streaming distribuída
+•Open Source
+•Desenvolvida para Publicar e assinar streams de registros
+•Fluxos de registros
+oProcessar em Tempo real e Armazena com Tolerância a falhas
+
+O Armazenamento de dados é feito em tópicos
+Chave + valor + data e hora
+
+Controlar fluxos de dados em tempo real
+
+API Kafka
+oProducer API
+•Permite que um aplicativo publique um fluxo de registros em
+um ou mais tópicos do Kafka
+oConsumer API
+•Permite que um aplicativo assine um ou mais tópicos e
+processe o fluxo de registros produzidos para eles
+oStreams API
+•Permite que um aplicativo transforme os fluxos de entrada em
+fluxos de saída
+oConnector API (Diferenal do KAFKA)
+•Permite criar e executar produtores ou consumidores
+reutilizáveis que conectam tópicos do Kafka a aplicativos ou
+sistemas de dados existentes
+
+Confluent CLI - Para instalação local
+oConfluent C ommand L ine I nterface (CLI)
+oInstalar, administrar a plataforma Confluent
+oAplicação para uso de desenvolvimento
+•Não adequado para ambiente de produção
+oExecução
+••<path-confluent>/bin/confluent<comandos>
+•Exemplo
+o<path-confluent>/bin/confluent list
+
+Comandos
+oconfluent <comando>
+oTÓPICOS
+•consume <tópico>
+•produce <tópico>
+oCONECTORES
+•config <conector>
+•load <conector>
+•unload <conector>
+oAJUDA
+•Version <serviços>
+•help <comando>
+
+olist
+•start <serviço> (Localmente iniciar o kafka e zookeeper)
+•status <serviço>
+•stop <serviço>
+•top <serviço> (Consumo de RAM, CPU, etc)
+•log <serviço>
+•current
+
