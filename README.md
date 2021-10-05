@@ -24,7 +24,7 @@
 - Sets | Sets Ordenados | Hashes
 - Pub/Sub | Configurações
 
-### [KAFKA - Básico] 🚧[Em andamento]
+### <img src="https://media.badgr.com/uploads/badges/assertion--ZbXe5NeQBuMFpv86jqP3A.png" width="70"><a href="https://badgr.com/public/assertions/-ZbXe5NeQBuMFpv86jqP3A" target="_blank">KAFKA - Básico</a>
 
 - Introdução ao Kafka e Instalação
 - Arquitetura Kafka - Conceitos | Kafka por linha de comando
@@ -32,7 +32,7 @@
 - KSQL Datagen | Schema Registry 
 - Kafka Connect e Clients | Cloud | Configurações e Boas Práticas
 
-### [ELASTIC - Essencial I]
+### [ELASTIC - Essencial I]🚧[Em andamento]
 
 ### [SPARK - Big Data Processing]
 
