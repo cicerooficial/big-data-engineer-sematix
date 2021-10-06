@@ -1,0 +1,45 @@
+Exercícios - Instalação
+
+1. Baixar a pasta elastic na Guia Arquivos do treinamento
+
+2. Instalação do docker e docker-compose
+Docker: https://docs.docker.com/get-docker/ 
+Docker-compose: https://docs.docker.com/compose/install/ 
+
+3. Executar os seguintes comandos, para baixar as imagens de Elastic:
+docker pull docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+docker pull docker.elastic.co/kibana/kibana:7.9.2
+docker pull docker.elastic.co/logstash/logstash:7.9.2
+
+4. Setar na máquina o vm.max_map_count com no mínimo 262144
+https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_set_vm_max_map_count_to_at_least_262144 
+
+$ sudo vi /etc/sysctl.conf
+$ i
+//Na última linha adionar
+$ vm.max_map_count=262144 
+//Apertar tecla ESC e digitar :w para salvar a escrita
+//Apertar tecla ESC e digitar :q para sair
+$ grep vm.max_map_count /etc/sysctl.conf
+//Se retornar vm.max_map_count=262144 é que está tudo ok
+$ sysctl -w vm.max_map_count=262144
+
+5. Iniciar o cluster Elastic através do docker-compose
+$ docker-compose up -d
+
+6. Listas as imagens em execução
+$ docker ps
+$ docker ps -a
+
+7. Verificar os logs dos containers em execução
+$ docker-compose logs
+//Ou ver os logs dos serviços individualmente 
+$ docker logs elastic_elasticsearch_1
+$ docker logs elastic_kibana_1
+$ docker logs elastic_logstash_1
+
+8. Verificar as informações do cluster através do browser:
+http://localhost:9200/ 
+
+9. Acessar o Kibana através do browser:
+http://localhost:5601/
