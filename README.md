@@ -1,6 +1,6 @@
 # Big Data Engineer - Sematix
-
 Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para engenharia de dados como: Big Data FOundations, MongoDB, Redis, Kafka, Elastic e Spark.
+
 
 ## Trilhas
 ### <img src="https://media.badgr.com/uploads/badges/6d160c59-0aa7-42e3-859f-d6e4013f9aab.png" width="70"> <a href="https://badgr.com/backpack/badges/61408d1244f9c944ee8f2d15" target="_blank"> BIG DATA FOUNDATION </a> 
