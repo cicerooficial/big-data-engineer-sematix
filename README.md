@@ -1,7 +1,7 @@
 # Big Data Engineer - Sematix
 
 ## Trilhas
-### <img src="https://media.badgr.com/uploads/badges/6d160c59-0aa7-42e3-859f-d6e4013f9aab.png" width="70"> <a href="https://badgr.com/backpack/badges/61408d1244f9c944ee8f2d15" target="_blank"> BIG DATA FOUNDATION </a> 🔄[Atualizando]
+### <img src="https://media.badgr.com/uploads/badges/6d160c59-0aa7-42e3-859f-d6e4013f9aab.png" width="70"> <a href="https://badgr.com/backpack/badges/61408d1244f9c944ee8f2d15" target="_blank"> BIG DATA FOUNDATION </a> 
 
 - Introdução ao Big Data
 - Hadoop - HDFS | Hive | MapReduce | YARN
@@ -10,7 +10,7 @@
 - Sqoop - Ingestão de dados
 - Spark - Processamento de dados
 
-### <img src="https://media.badgr.com/uploads/badges/5255bd41-1608-4c10-829b-59007f6f268e.png" width="70"> <a href="https://badgr.com/backpack/badges/614930beb227607160e37de8" target="_blank"> MONGODB - Básico </a> 🔄[Atualizando]
+### <img src="https://media.badgr.com/uploads/badges/5255bd41-1608-4c10-829b-59007f6f268e.png" width="70"> <a href="https://badgr.com/backpack/badges/614930beb227607160e37de8" target="_blank"> MONGODB - Básico </a> 
 - Introdução ao NoSQL com MongoDB e Instalação
 - CRUD | Consultas em Documentos
 - Atualizar Documentos | Remover Documentos
