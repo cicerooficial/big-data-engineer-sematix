@@ -1,5 +1,10 @@
 # Big Data Engineer - Sematix
+<<<<<<< Updated upstream
 Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para engenharia de dados como: Big Data FOundations, MongoDB, Redis, Kafka, Elastic e Spark.
+=======
+
+Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para engenharia de dados como: Big Data Foundations, MongoDB, Redis, Kafka, Elastic e Spark.
+>>>>>>> Stashed changes
 
 
 ## Trilhas
