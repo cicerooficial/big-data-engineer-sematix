@@ -34,5 +34,10 @@
 
 ### [ELASTIC - Essencial I]🚧[Em andamento]
 
+- Introdução ao Elastic e Instalação
+- Requisições para Elasticsearch | Operações em Massa
+- API de Pesquisa | API de Índices
+- Queries e Filtros
+
 ### [SPARK - Big Data Processing]
 
