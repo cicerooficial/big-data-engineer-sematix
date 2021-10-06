@@ -1,2 +1,137 @@
-Arquitetura Elastic
+INTRODU~ÇÃO ARQUITETURA ELASTIC
 
+Foi pensado para resolver problemas de busca:
+
+oElasticsearch (B.D. orientado a documento com diferencial em ter um motor de busca eficiente)
+•Engine de search e analystics altamente escalável
+•Banco de dados também é um BD, mas não é o foco principal
+oLogstash
+•Transporte entre a origem e destino
+oBeats
+•Fica do lado do cliente, Não servidor
+Assim como o Logstash é utilizado para:
+•Transporte entre a origem e destino
+•Coletores de dados
+•Distribuído
+oKibana
+•Realiza todo Gerenciamento do cluster ElasticSearch
+•GUI ( Graphical User Interface) da Elastic
+•Visualização dos dados
+
+Relacional x ElasticSearch
+
+Banco Relacional	ElasticSearch
+Banco de dados		Index
+Tabela			Type
+Schema			Mapping
+Registro (linha)	Documento
+Coluna			Atributo
+
+oA partir da versão 7 do Elastic , os documentos são todos do tipo doc
+•Versão 6
+oApenas um único tipo de nome
+oVersão 6.8: usar ? include_type_name =false
+•Versão 7 (Atual 7.9.2)
+oinclude_type_name aviso de depreciado
+•Versão 8
+oinclude_type_name será removido
+
+Índice
+
+oShards
+•Índice é dividido por shards
+•Shards armazenam os dados
+oAlias
+•Link virtual para um índice real (apelido)
+•Associar um alias a mais de um índice (grupos)
+oAnalyzer
+•Buscar por Full Text e Valores exatos
+oMapping
+•Definição da estrutura do seu índice
+
+INSTALAÇÃO ELASTIC STACK
+
+oFerramentas
+•Elasticsearch
+•Kibana
+•Beats
+•Logstash
+oLink versão atual:
+•https://www.elastic.co/pt/downloads/<ferramenta>
+oLink para outras versões
+•https://www.elastic.co/pt/past-releases/<ferramenta>-<versão>
+•Exemplo:
+ohttps://www.elastic.co/pt/downloads/past-releases/elasticsearch-6-8-0
+
+oSite Oficial
+•https://www.elastic.co/pt/downloads/
+oLocalmente
+•Linux
+•Windows
+•Mac
+oDocker
+oCloud Serviço da Elastic
+•Desenvolvimento
+•Produção
+•https://www.elastic.co/pt/pricing/
+
+
+Preparação Ambiente - Cluster Elastic
+
+oDownload da imagem: https://www.docker.elastic.co/
+•docker pull docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+•docker pull docker.elastic.co/kibana/kibana:7.9.2
+•docker pull docker.elastic.co/logstash/logstash:7.9.2
+oSetar o vm.max_map_count com no mínimo 262144
+oCriar docker-compose.yml e os arquivos de configuração para facilitar o gerenciamento do elastic
+
+Configurar Máquina Elastic
+
+oSetar o vm.max_map_count com no mínimo 262144
+•Linux
+oPermanentemente
+•grep vm.max_map_count /etc/sysctl.conf
+•vm.max_map_count=262144
+oEm execução
+•sysctl -w vm.max_map_count=262144
+•Mac
+oscreen ~/Library/Containers/ com.docker.docker / vms / tty
+osysctl w vm.max_map_count =262144
+ohttps://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_set_vm_max_map_count_to_at_least_262144
+
+•Windows ou Mac Docker Desktop
+odocker-machine ssh
+osudo sysctl -w vm.max_map_count=262144
+•Windows Docker Desktop com WSL2
+owsl -d docker desktop
+osysctl -w vm.max_map_count=262144
+
+Arquivos de configuração
+
+oBaixar o diretório elastic na guia arquivos da plataforma
+oEstrutura de arquivos
+-elastic
+	-docker compose.yml
+	-settings
+		-elasticsearch.yml
+		-kibana.yml
+		-logstash.yml
+	-pipeline
+		-logstash.conf
+
+Acessos Ambiente docker
+
+oAcesso o container Elasticsearch
+•docker exec -it elastic_elasticsearch_1 bash
+oAcesso o container Kibana
+•docker exec -it elastic_kibana_1 bash
+oAcesso o container Logstash
+•docker exec -it elastic_logstash_1 bash
+
+Verificar Funcionamento do cluster Elastic
+
+oVerificar se os nós estão funcionando
+•$ curl -X GET "localhost:9200/_cat/ nodes?v&pretty"
+oAcessar os serviços pela Web
+•Kibana : http://localhost:5601/
+•Elasticsearch : http://localhost:9200/
