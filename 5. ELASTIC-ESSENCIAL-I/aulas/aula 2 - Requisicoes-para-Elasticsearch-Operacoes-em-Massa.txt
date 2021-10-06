@@ -1,0 +1,148 @@
+Comunicação com Elasticsearch
+
+API Rest
+
+oComunicação Protocolo HTTP (AÇÃO)
+•HEAD
+•GET
+•POST
+•PUT
+•DELETE
+oRequisições HTTP para a API de elasticsearch por meio do envio de objetos JSON
+
+oEstrutura de uma requisição HTTP:
+•<ação> endereço_api:porta/índice/<opções>
+oExemplo
+•PUT localhost:9200/cliente/_create
+
+Integração Linguagens
+
+oClientes Elastic
+•https://www.elastic.co/guide/en/elasticsearch/client/index.html
+oClientes Elastic que a Comunidade Contribuem
+•https://www.elastic.co/guide/en/elasticsearch/client/community/current/index.html
+
+Interface Kibana Comunicação HTTP
+
+oAcessar
+•http://localhost:5601
+•Menu/Management/Dev Tools
+ohttp://localhost:5601/app/dev_tools
+
+Operações básicas CRUD
+
+HEAD
+oRetorna apenas o cabeçalho do HTTP
+•Saber se o documento existe
+oExemplo
+•Curl
+oFerramenta de linha de comando
+oBiblioteca para transferir dados com URLs
+oExemplo
+•curl -XHEAD -v http://localhost:9200/cliente/_doc/1
+•Kibana
+oOpção: Dev Tools
+oExemplo
+•HEAD cliente/_doc/1
+
+PUT
+oCriar ou reindexar um documento inteiro (_ version)
+oExemplo
+CRIAR DOCUMENTO:
+PUT cliente/_doc/1
+{
+	"nome" : "Lucas",
+	"idade" : 20,
+	"conhecimento" : "Windows, Office, Hadoop , Elastic
+}
+NÃO CRIAR CASO O DOCUMENTO JÁ EXISTIR:
+PUT cliente/_create/1
+{
+	"nome" : "Lucas",
+	"idade" : 20,
+	"conhecimento" : "Windows, Office, Hadoop , Elastic , Sqoop
+}
+
+POST
+oCriar um documento com _id ou atualizar um documento parcial
+oExemplo
+ATUALIZAR DOCUMENTO:
+POST cliente/_update/1
+{
+	"doc " :{
+		"nome" : "João"
+	}
+}
+INSERIR DOCUMENTO COM ID AUTOMÁTICO:
+POST cliente/_doc
+{
+	"nome" : "Marcos"
+}
+
+DELETE
+oDeletar um documento
+•Exemplo
+DELETE cliente/_doc/1
+oDeletar um índice
+•Exemplo
+DELETE cliente
+
+GET
+
+oExemplos
+•Informações sobre o nó do elasticseach http://localhost:9200/)
+oGET /
+•Buscar todos os documentos em um índice
+oGET cliente/_search
+•Buscar um documento em um índice
+oGET cliente/_ doc/1
+•Buscar a quantidade de documentos em um índice
+oGET cliente/_count
+•Buscar os dados de um documento em um índie
+oGET cliente/_source/1
+•SQL --> select * from cliente where id=1
+
+_____________________________________________
+
+OPERAÇÕES EM MASSA
+
+Múltiplas Operações Simultâneas
+
+Bulk API
+
+oExecução de várias operações de indexação / exclusão em uma única chamada de API
+oAumentar a velocidade de indexação
+oComandos
+POST _bulk
+{"index":{"_index":"test","_id":"1"}
+{"field1": "value1"}, {"field2": "value2"} ... {"fieldN": "valueN"}
+{"delete": { "_index":"test","_id":"2"}
+*Create não permite recriar caso o indice já exista
+{"create": { "_index":"test","_id":"3"}
+{"field1": "value3"}
+{"update": {"_id" : "1", "_index" : test "}
+{"doc": {"field2" : "value2"}}
+
+Exemplo Bulk API
+
+POST concessionaria/_bulk
+{"create":{"_id":"1"}
+{"nome":"carro"}
+{"create":{"_id":"2"}
+{"nome":"automóvel"}
+{"create":{"_id":"3"}
+{"nome":"caminhão"}
+{"create":{"_id":"4"}
+{"nome":"caminhonete"}
+{"create":{"_id":"5"}
+{"nome":"veículo"}
+
+Importação de dados com Kibana
+
+oHome
+oMenu/ Kibana Machine Learning
+•Import data
+oUpload file
+
+*Opção ainda em versão BETA, para carregar apenas arquivos de teste de até 100Mb.
+
