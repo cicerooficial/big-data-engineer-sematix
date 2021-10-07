@@ -1,0 +1,239 @@
+API DE PESQUISA
+
+Pesquisa Funcionamento
+
+oBuscar todos os documentos
+•GET cliente/_search
+oPesquisar algo em todos os documento
+•GET cliente/_search?q=hadoop
+oFaz uso do campo "_all"
+oPesquisar em um atributo específico
+•GET cliente/_search?q=nome:João
+•GET cliente/_search?q=nome:João&q=idade:20
+
+Query DSL
+
+oDefinição de consultas
+•Query DSL (Domain Specific Language)
+•Baseada em JSON
+oExemplo:
+GET cliente/_search?q=Hadoop
+GET cliente/_search?q=Hadoop
+{
+	"query":{
+		"match_all ":{}//Busca todos os documentos
+	}
+}
+
+Pesquisa Cabeçalho
+
+oEstrutura do json de busca
+•Took: Tempo em milissegundo
+•Timed_out: Tempo de limite excedido
+•_shards: Quantidade usadas (sucesso e falha)
+•Hits: Informação do resultado
+	oTotal: Quantidade de documentos encontrados
+	oMax_score: Algoritmo para verificar o valor de semelhança da consulta (0 à 1) //O valor pode ser forçado para ser maior
+		•Score é calculado com uso do algoritmo BM25
+
+Pesquisa Múltiplos Índices
+
+oPesquisar em todos os índices
+•GET _all/_search?q=Windows
+•Cuidado para não fazer consultas lentas
+oPesquisar em índices específicos
+•GET produto,cliente/_search?q =Windows
+•GET produto,cliente/_count?q=Windows
+•Caso o índice não exista
+oindex_not_found_exception
+
+
+
+Limitação e Paginação na Pesquisa
+
+oPara pesquisas com muitos documentos
+•Difícil visualização
+•Limitar a quantidade de documentos
+oSize = número de documentos
+•Paginação
+oFrom = Documento que irá visualizar
+•Resposta máxima
+ofrom + size <= index.max_result_window (10.000) //Por default, não pode ultrapassar esse atributo. Caso ultrapasse o Elastic recomenda trabalhar com Scroll.
+
+oLimitar o número de documentos
+•GET cliente/_search?q=hadoop&size=100
+oPaginação, visualizar x documentos por paginação
+•GET cliente/_search?q=hadoop&size=100&from=500
+oPaginação na estrutura na busca
+GET cliente/_search
+{
+	"from":0,
+	"size":10,
+	"query":{
+	...
+	}
+}
+
+Exemplo Limitação e Paginação
+
+oMostrar os 10 primeiros documentos (1º Página)
+GET _search?&size=10
+{
+	"query":{
+	"match_all ":{}
+	}
+}
+oMostrar os documentos de 31 à 40 (4º Página)
+GET _search?&size=10&from=30
+{
+	"query":{
+	"match_all":{}
+	}
+}
+oPaginação
+•Ex com paginação de 10 documentos.
+o1º Página - size=10 & from=0 (Default)
+o2º Página - size=10 & from=10
+o10ª Página - size=10 & from=90
+•Fórmula
+oPrimeiro documento da busca = From + 1
+oÚltimo documento da busca = From + Size
+oPágina = From / Size + 1
+
+
+API DE ÍNDICES
+
+Gerenciamento de índices Criação
+
+oConfiguração básica
+PUT teste
+{
+	"settings":{
+		"index":{
+			"number_of_shards":1,
+			"number_of_replicas":1
+		}
+	},
+	"mappings":{...},
+	"aliases":{...}
+}
+oBoa prática , cada shard ter entre 20 GB à 50 GB (Não é uma regra)
+•Precisa testar o índice para saber o valor
+ideal
+
+Busca 
+oConsultar índice
+•GET teste (busca todos os metadados)
+•GET teste/_search
+•GET teste/_settings
+•GET teste/_mapping
+•GET teste/_alias
+•GET teste/_stats
+oVerificar se o índice existe
+•HEAD teste
+
+Remoção
+oDeletar um índice
+PUT teste1
+DELETE teste1
+oDeletar múltiplos índices
+PUT indice1
+PUT indice2
+PUT indice3
+PUT indice4
+GET ind*
+DELETE ind*
+HEAD ind*
+* é o coringa
+
+Fechamento e Abertura
+Quando desejar diminuir a seobrecarga do cluster. Pois quando fechado, ele só mantém os metadados. Ficando bloquado para leitura e gravação.
+*Obs.: A Elastic não recomenda manter fechado por muito tempo. Pois, caso o nó deixar o cluster por algum motivo, ele tentará reconstruir as cópias e por estar fechado as cópias serão perdidas e com o tempo po perder dados. 
+Melhor opção é usar o frozen, para congelar e depois reutilizar.
+
+oFechar índice
+•Diminuir sobrecarga no cluster
+oManter metadados
+•Bloquear
+oLeitura
+oGravação
+•Não manter por muito tempo
+oQuando um nó deixar o cluster
+•As cópias serão perdidas
+oSolução: Frozen Index
+•Exemplo
+oPOST teste/_close
+oPOST test*/_close
+oAbrir índice
+•POST teste/_open
+•POST test*/_open
+
+Mapeamento - Comandos básicos para Mappings
+
+Mapeamento
+oElasticsearch define automaticamente no índice os tipos dos campos
+oVisualizar o mapeamento
+•SQL --> schema da tabela
+oExemplo
+•GET cliente/_mapping
+•Não é possível alterar o tipo do dado
+	oReindex
+•É possível criar novos atributos
+
+Tipo de dados
+oCore
+•Texto
+otext and keyword
+•Numérico
+olong , integer , short, byte, double , float
+•Date
+•Binary
+•Boolean
+•Ip
+oComplexos
+•Object
+•Nested
+
+Pesquisa
+oMapeamento pelo índice
+•GET cliente/_mapping
+•GET client*/_mapping
+oMapeamento pelo atributo
+•GET cliente/_mapping/field/conhecimento
+•GET cliente/_mapping/field/conhe*
+•GET cliente/_mapping/field/nome,conhecimento
+oMapeamento de todos os índices
+•GET _mapping
+
+Exemplo
+
+oExemplo de Criação
+PUT cliente1
+{}
+PUT cliente1/_mapping/
+{
+"properties":{
+	"nome":{"type":"text"},
+	"idade":{"type":"long"},
+	"conhecimento":{"type":"keyword"}
+	}
+}
+
+Reindex
+
+Índice Reindex
+
+oAlterar o mapeamento
+oForma básica para Reindexar
+•Configura o novo índice
+•Indexa o índice de entrada ( source ) para o destino dest
+oExemplo
+POST _reindex
+{
+	"source ":{
+		"index":"teste1"
+	},
+	"dest":{
+		"index":"new_teste"
+	}
+}
