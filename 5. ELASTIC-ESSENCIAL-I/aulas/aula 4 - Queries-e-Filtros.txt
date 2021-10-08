@@ -1,0 +1,421 @@
+QUERY E FILTROS
+Conceitos
+Índice invertido
+Tipos de queries
+
+Entendimento Query (Casamentos de informações)
+
+oComo fazer as buscas?
+•Queries
+oQuão bem a busca corresponde com o documento
+oCaracterísticas
+•Tem score
+•Não são a rmazenados na cache
+
+•Filtros (Busca exatas)
+oA busca corresponde com o documento
+•Sim ou não
+oCaracterísticas
+•Não possui score (order by)
+•Armazenados em cache automaticamente
+oAcelerar o desempenho
+
+Inverted Index
+
+oÍndice Invertido
+oÍndice Remissivo
+•As páginas que estão localizados os principais termos. Como um sumário de livro
+Ex:
+A
+Alef.........3
+Análise......1
+M
+Matemática...2
+T
+Topologia....3
+
+Como salvar todo o dado e como buscar? Existem vários tipos de consultas.
+
+Tipos de Queries
+
+oQuery DSL
+•https://www.elastic.co/guide/en/elasticsearch/reference/current/query dsl.html
+
+oTodas as queries calculam o "_score". Que é o quanto o documento casa com a consulta ou não.
+•Caso não desejo utilizar o score:
+oUtilizar o "constant_score"
+oEsse tipo de filtragem de dados, antes da busca textual Ganha desempenho, utilizando outras filtragens junto com o score:
+oTerm
+oTerms - Busca informações exatas. Ex: Maiúscula
+oRange
+oMatch - Busca informações não exatas. Ex: Maiúscula e Minúscula
+oExists
+oMissing
+oPrefix
+oWildcard
+oRegexp
+oFuzzy
+oIds
+
+Exemplo Query Term
+
+GET cliente/_search
+{
+	"query": {
+		"term ":{
+		"nome":"joão" //É preciso buscar exatamente como está salvo no indice
+		}
+	}
+}
+oQual o "took" e o "_score"?
+{
+"took":5, //O retorno foi em 5ms
+...
+"hits":[
+	{
+	"_index":"cliente",
+	"_type":"_doc"
+	"_id":"1",
+	"_score":0.9808291,
+	"_source":{
+		"nome":"João",
+		"idade":20,
+		"conhecimento":"Windows, Office, Hadoop, Elastic"
+	}
+...
+}
+
+Term com constant_score
+
+GET cliente/_search
+{
+	"query":{
+	"constant_score":{
+		"filter":{
+			"term ":{
+				"nome":"joão"
+			}
+		}
+	}
+	}
+}
+
+oQual o "took" e o "_score"?
+{
+"took":1, //Ganhou 4ms
+...
+"hits":[
+	{
+	"_index":"cliente",
+	"_type":"_doc"
+	"_id":"1",
+	"_score":1.0,
+	"_source":{
+		"nome":"João",
+		"idade":20,
+		"conhecimento":"Windows, Office, Hadoop, Elastic"
+	}
+...
+}
+
+Terms
+
+GET cliente/_search
+{
+	"query":{
+		"terms":{
+		"idade":[30,20] //Analisando um conjunto de itens(vetor)
+		}
+	}
+}
+
+Bool Query - Consultas booleanas
+
+oFiltrar um dataset grande. Quando é preciso utlizar vários tipos de consultas e é preciso ter uma estrutura flexível para gerar esse nível de consulta flexível.
+oEstrutura flexível
+oAtributos
+•Must - And
+•Should - OR
+•Must_not - Not and
+•Filter - Filtrar mais dados antes de atender as outras cláusulas. 
+Diferente dos outros atributos, não vai calcular Score.
+
+Estrutura Bool Query
+
+GET cliente/_search
+{
+"query":{
+	"bool":
+		"must":[{...}],
+			"must_not":[{...}
+				"should":[{...}
+					"filter":[{...}
+		}
+	}
+}
+
+Exemplo Bool Query
+o1 Consulta booleana com 1 atributo
+GET cliente/_search
+{
+"query":{
+	"bool":{
+		"should":{
+			"term":{
+			"idade":"30"
+			}
+		}
+	}
+}
+}
+
+o1 consulta booleana com N atributos
+GET cliente/_search
+{
+"query":{
+	"bool":{
+		"must":[
+			{"match":{"estado":"sp"}},
+			{"match":{"ativo":"sim"}}
+			]
+		
+		}
+	}
+}
+
+oN consultas booleanas com N atributos
+GET cliente/_search
+{
+“query":{
+	"bool":{
+	"must":{"match":{"setor":"vendas"}},
+	"should ":[
+		{"match":{"tags":"imutabilidade"}},
+		{"match":{"tags": "larga escala"}}
+	],
+	"must_not":{"match":{"nome":"inativo"}}
+	}
+}
+}
+
+________________________________________________
+
+Ordem de Busca
+
+oQuantas vezes o termo aparece no atributo
+*Se é um atributo que aparece mais vezes, ele terá um socre maior.
+oTamanho do atributo
+*Quanto menor, mais terá elevação do valor do score
+oTamanho do termo
+*Quanto menor, mais terá elevação do valor do score
+oQuantas vezes o termo aparece em todos os documentos
+*Quanto menos aparecer, mais desempenho terá (mais boost na busca)
+oExemplo:
+GET cliente/_search
+{
+"query": {
+"match": {
+"conhecimento":"sqoop hive impala elk"
+}
+}
+}
+
+* Usar os operadores AND e OR ajuda a controlar a busca de documento balenceando o score.
+
+oPadrão de busca é sempre o "or"
+o"operator":"and"
+
+GET cliente/_search
+{
+"query":{
+"match":{
+"conhecimento":{
+"query":"sqoop hive",
+"operator":"and"
+}
+}
+}
+}
+
+oDefinir o mínimo de % que estejam na consulta
+•minimum_should_match ": " valor em
+oExemplo
+GET cliente/_search
+{
+"query":{
+"match":{
+"Hobby":{
+"query":"sqoop hive impala",
+"minimum_should_match":"50%"
+}
+}
+}
+}
+
+oDefinir o mínimo de % que estejam na consulta
+•minimum_should_match ": Número
+oExemplo
+GET cliente/_search
+{
+"query":{
+"match":{
+"Hobby":{
+"query":"sqoop hive impala",
+"minimum_should_match":2
+}
+}
+}
+}
+
+Múltiplos Atributos
+
+{
+"query":{
+"bool":{
+"should":[
+{"match":{"endereco":"pinheiros"}},
+{ "match":{"cidade":"pinheiros" }},
+{ "match":{"estado":"pinheiros" }}}
+]
+}
+}
+}
+
+{
+"query": {
+"multi_match":
+"query":"pinheiros",
+"type ":most_fields
+"fields":["endereco", "cidade", "estado"]
+}
+}
+}
+o
+OBS: Não pode usar junto com operator e minimum_should_match
+
+________________________________________
+
+Consultas por intervalo
+Range Query
+
+oAtributos para controlar o intervalo
+•gte - Maior que ou igual a
+•gt  - Maior que
+•lte - Menor que ou igual a
+•lt - Menor que
+
+Exemplo Range Query
+
+oConsultar o campo idade maior ou igual a 10
+GET cliente/_search
+{
+"query":{
+"range":{
+"idade":{
+"gte":10
+}
+}
+}
+}
+
+o
+Consultar o campo idade menor ou igual a 25
+GET cliente/_search
+{
+"query":{
+"range":{
+"idade":{
+"lte":25
+}
+}
+}
+}
+
+oConsultar o campo idade entre 10 e 25. Como não tem entre, utiliza o maior(gte) e menor(lte) combinados
+GET cliente/_search
+{
+"query":{
+"range":{
+"idade":{
+"gte":10,
+"lte":25
+}
+}
+}
+}
+
+________________________________________
+
+Consultas por intervalo de tempo
+
+Opções Tempo
+
+oPropriedades com data
+•"format":"dd/MM/yyyy||yyyy"
+•"time_zone":"+03:00"
+oExemplos
+•Now: Agora
+•+1d: Adiciona 1 dia
+•-1M: Subtrai 1 mês
+y - Anos
+M - Meses
+w - Semanas
+d - Dias
+H - Horas
+h - Horas
+m - Minutos
+s - Segundos
+
+Exemplo Range de data
+
+oIntervalo com diferentes formatos
+GET cliente/_search
+{
+"query":{
+"range":{
+“data":{
+"gte":"01/01/2012",
+"lte":"2013"
+"format":"dd/MM/yyyy||yyyy"
+}
+}
+}
+}
+
+GET cliente/_search
+{
+"query":{
+"range":{
+“data":{
+"gte":"now-1d",
+"lt":"now"
+}
+}
+}
+}
+
+GET cliente/_search
+{
+"query":{
+"range":{
+“data":{
+"gte":"2015-01-01 00:00:00",
+"lte":"now",
+"time_zone":"+03:00"
+}
+}
+}
+}
+
+oCampo padrão de tempo Timestamp
+GET cliente/_search
+{
+"query":{
+"range":{
+"@timestamp":{
+"gte":"2015-08-4T11:00:00",
+"lt":"2015-08-04T12:00:00"
+}
+}
+}
+}
