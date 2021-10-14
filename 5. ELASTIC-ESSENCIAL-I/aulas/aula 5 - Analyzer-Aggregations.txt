@@ -1,0 +1,469 @@
+**Analyzer**
+
+Conceitos 
+
+oBusca exata
+	•Sim e não
+oBusca FullText
+	•Quanto a busca casa (_score)
+	•Analisadores
+		oTestar
+		oAplicar em atributos específicos
+		oAnalyzer personalizado
+oÍndice invertido
+	•Quebrar em tokens
+	•Inserir numa tabela
+	•_search?cidade =“São Paulo"
+		oTokens: são paulo
+
+Principais Analyzer
+
+oEspaço em branco: whitespace
+	•Separa as palavras por espaço
+oSimples: simple
+	•Remover números (Diferença do padrão)
+	•Remover espaços e pontuação
+	( '!@#$%¨&*-+^'~/:;><,)
+	•Somente texto
+	•Texto em lowercase
+oPadrao do Elastic: standard
+	•Remover espaços e pontuação
+	•Texto em lowercase
+oIdioma: brazilian, english, etc.
+	•Remover acentos, gênero e plural
+
+Exemplos de Analyzer  
+
+oAnalyzer Standard ou Simple
+POST _analyze
+{
+	"analyzer ": "standard",
+	"text ": "Elasticsearch e Hadoop são ferramentas de Big Data"
+}
+POST _analyze
+{
+"analyzer ": simple",
+"text ": "Elasticsearch e Hadoop são ferramentas de Big Data"
+}
+
+//Resultado
+
+{
+"tokens" : [
+{"token" : "elasticsearch"},
+{"token" : “e"},
+{"token" : "hadoop"},
+{"token" : “são"},
+{"token" : "ferramentas"},
+{"token" : “de"},
+{"token" : "big"},
+{"token" : "data"}
+]
+}
+
+oAnalyzer whitespace
+POST _analyze
+{
+	"analyzer ": whitespace",
+	"text ": "Elasticsearch e Hadoop são ferramentas de Big Data"
+}
+{
+"tokens" : [
+{"token" : “Elasticsearch"},
+{"token" : “e"},
+{"token" : “Hadoop"},
+{"token" : “são"},
+{"token" : "ferramentas"},
+{"token" : “de"},
+{"token" : “Big"},
+{"token" : “Data"}
+]
+}
+
+oAnalyzer em Português
+POST _analyze
+{
+"analyzer ": "brazilian",
+"text ": "Elasticsearch e Hadoop são ferramentas de Big Data"
+}
+{
+"tokens" : [
+{"token" : "elasticsearch"},
+{"token" : "hadoop},
+{"token" : “sao"},
+{"token" : "ferrament"},
+{"token" : "big"},
+{"token" : "dat}
+]
+}
+
+oAnalyzer English
+POST _analyze
+{
+"analyzer ": "english",
+"text ": "Elasticsearch and Hadoop are Big Data tools"
+}
+{
+"tokens" : [
+{"token" : "elasticsearch"},
+{"token" : "hadoop"},
+{"token" : "big"},
+{"token" : "data"}
+{"token" : “tool"}
+]
+}
+
+Aplicação de Analyzer em atributos
+
+Adicionar em um atributo
+
+PUT cliente1
+{
+"mappings": {
+"properties ":
+"conhecimento": {
+"type ": "text",
+"analyzer ": "standard"
+}
+}
+}
+}
+
+Boas Práticas
+
+oIndexar o mesmo campo de maneiras diferentes para fins diferentes
+•Tipo Keyword (Palavra inteira/chave)
+	oClassificação
+	oAgregação
+•Tipo Text
+	oPesquisa Fulltext
+	oManter 2 versões do atributo com analyzer
+•Tipo Keyword
+	oDado original
+•Tipo text
+	oDado com analisador
+
+Exemplo Campo de 2 Tipos
+
+PUT cliente2
+{
+"mappings": {
+"properties ":
+"conhecimento": {
+"type ": text,
+"analyzer ": "standard",
+"fields": "raw ": "type ": "keyword"
+}
+}
+}
+}
+
+Criação de índice com settings e mappings
+
+PUT cliente3
+{
+"settings": {
+"index": {
+"number_of_shards ": 1,
+"number_of_replicas ": 0
+}
+},
+"mappings": {
+"properties ":{
+"nome": {"type ": "text"},
+"conhecimento": {
+"type ": "text",
+"analyzer ": "whitespace",
+"fields ": {
+"raw ": "type ": "keyword"},
+}
+}
+}
+}
+}
+
+------
+
+**Aggregations**
+
+Conceitos
+
+oForma de analisar os dados indexados
+oEstrutura
+GET <index>/_search
+{
+"aggs ":
+""<nomeAgregação >":{}
+"<TipoAgregação >":{}
+}
+}
+}
+
+Tipos
+
+oBucket
+	•Combinam os documentos resultantes em buckets
+		oBuckets são criados
+oMetric
+	•Cálculos matemáticos feitos nos campos de documentos
+		oSão calculados em buckets
+oMatrix
+	•Operam em diversos campos produzindo uma matriz de resultado ( matrix_stats )
+oPipeline
+	•Agrega a saída de outras agregações
+
+Tipos
+
+oBuckets
+•Conjunto de documento formado por critérios
+oData
+oIntervalo
+oAtributo
+•Ex.
+oRange
+oDate_range
+oIp_ranges
+oGeo_distance
+oSignificant_terms
+oEtc
+
+Métricas
+
+•Operações matemáticas
+oUm valor de saída
+oEx.
+•Avg
+•Sum
+•Min
+•Max
+•Cardinality
+•Value_count
+•Etc
+
+•Operações matemáticas
+oN valores de saída
+oEx.
+•Stats
+•Percentiles
+•Percentile_ranks
+•Etc
+
+Agregações de Métricas
+
+Exemplo Avg
+
+oMédia do campo qtd
+GET cliente/_search
+{
+"query": { ... },
+"aggs ":{
+"media": {
+"avg ":
+"field ": qtd
+}
+}
+}
+}
+
+Exemplo Sum com limitação de escopo
+
+oVisualizar apenas o resultado da agregação, ou uma parte dos resultados
+•size
+GET cliente/_search
+{
+"query": { ... },
+**"size ":0,** //Sempre que quiser ver somente agregação size=0
+"aggs ":{
+"soma": {
+"sum": {
+"field ": "qtd"
+}
+}
+}
+}
+
+Exemplo Stats
+
+oVárias estatísticas com apenas uma requisição
+GET cliente/_search
+{
+"query": { ... },
+"aggs "{:
+“estatistica ":{
+"stats ":{
+"field ": "qtd"
+}
+}
+}
+}
+oEstatísticas
+•"count "
+•"min"
+•"max "
+•"avg "
+•"sum"
+
+Exemplo Min e Max
+
+oValor mínimo e máximo do campo qtd
+GET cliente/_search
+{
+"aggs ":{
+"minimo ":{
+"min": {"field ": "qtd"}
+},
+"maximo ":
+"max ": {"field ": "qtd"}
+}
+}
+}
+
+Exemplo Cardinalidade
+
+oContar valores únicos
+•O resultado pode não ser preciso para grandes datasets
+oHyperLogLog ++ algorithm
+oPrecisão x Velocidade
+GET cliente/_search
+{
+"size“:0,
+"aggs ":{
+"quantidade_cidades ":{
+**"cartinality"**:{
+"field ": "cidade.keyword"
+}
+}
+}
+}
+
+//Obs.: Não existe agregação mediana
+
+Exemplo Separar em porcentagem(Mediana)
+
+oMediana do campo qtd
+GET cliente/_search
+{
+"aggs ":{
+"mediana": {
+**“percentiles"**:{
+"field ": "qtd"
+}
+}
+}
+}
+oMedian is 445.0
+
+oResposta do Elasticsearch
+{
+...
+"aggregations ":{
+"load_time_outlier ": {
+"values " : {
+"1.0": 5.0,
+"5.0": 25.0,
+"25.0": 165.0,
+**"50.0": 445.0,**
+"75.0": 725.0,
+"95.0": 945.0,
+"99.0": 985.0
+} } } }
+
+oMediana do campo qtd
+GET cliente/_search
+{
+"aggs ":{
+"media": {
+**“percentiles "**:{
+"field ": "qtd"
+"percents": [25, 50, 75, 100]
+}
+}
+}
+}
+oMedian is 445.0
+
+Exemplo Tempo
+
+oAgrupar valores por um intervalo
+•date_histogram
+GET logs_servico /_search
+"size": 0,
+"aggs ":{
+"logs_por_dia ":{
+"date_histogram ":{}
+"field": "@timestamp", //Pode ser @qualquer atributo do tipo data
+"calendar_interval ": "day"
+}
+} } }
+
+oOpções:
+•"calendar_interval": "month"
+•"fixed_interval":"10m"
+oMedidas:
+•ms , s, m, h, d, w, M, q, y
+
+oAgrupar valores por um valor específico
+•histogram
+GET logs_servico /_search
+"size": 0,
+"aggs ":{
+"logs_cada_100ms": {
+"histogram": {
+"field": “runtime_ms",
+"interval": 100
+}
+}
+}
+}
+
+Exemplo Intervalo
+
+GET cliente/_search
+{
+"query": { ... },
+"aggs ":`{
+"intervalo": {
+"range": {
+"field ": "qtd"
+"ranges": [
+{ "to ": 5},
+{ "from": 5, "to ": 20},
+{ "from": 20}
+]
+}
+}
+} }
+
+Exemplo Intervalo de Data
+
+GET cliente/_search
+{
+"query": { ... },
+"aggs ":{
+"intervalo_data ":{
+"date_range ":{
+"field ": "data",
+"ranges": [
+{ "from ": 2019-01-01, "to": 2019-05-01 }
+]
+}
+}
+}
+}
+
+Exemplo Atributo
+
+oEspecificar o campo e a quantidade de valores
+•Valores com a maior relevancia
+oEx. As 5 maiores cidades que visitaram o site
+GET logs_servico /_search
+"size": 0,
+"aggs ":{
+“cidades_views ":{
+"terms": {
+"field": “cidade.keyword",
+"size": 5
+}
+}
+}
+}
