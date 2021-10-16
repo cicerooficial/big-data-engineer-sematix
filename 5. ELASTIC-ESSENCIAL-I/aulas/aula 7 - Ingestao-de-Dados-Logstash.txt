@@ -1,0 +1,106 @@
+Logstash Conceitos
+
+Parecido com o Beats. Só que o beats pega dados de várias fontes e envia para o Elasticsearch ou Logstash. 
+
+O Logstash é um serviço que faz o mesmo processo de enviar diversas fontes de dados para o Elasticsearch para analysis, archiving, monitoring e alertying.
+
+A grande diferença é que o logstash tem plugins divididos em 3 camadas: 
+
+oPlugin
+	•Input - Entrada de dados
+	•Filter - Transformações 
+	•Output - qual a saída que enviará os dados
+
+Boa prática: Enviar os beats para o Logstash (onde passará para um pipeline) com a saída para o Elasticsearch. Os beats não tem operação de filter e tem não consegue fazer transformações dos dados.
+
+oPara fazer o pipeline (configurar os plugins) deve alterar o arquivo logstash.conf. Que é uma estrutura do json:
+input{
+}
+filter
+}
+output {
+}
+
+Instalação e Configuração
+
+oVersion Elasticsearch 7.9.2
+oDocumentação da Elastic
+https://www.elastic.co/guide/en/logstash/current/getting-started-with-logstash.html
+oEstrutura pastas
+docker-compose.yml
+-pipeline/ logstash.conf
+-settings
+-elasticsearch.yml
+-kibana.yml
+-logstash.yml
+
+Plugins de Entrada
+
+oPermite que uma fonte específica de eventos seja lida pelo Logstash
+•https://www.elastic.co/guide/en/logstash/7.9/input-plugins.html
+oPlugins de entrada
+•Azure_event_hubs , **beats** , cloudwatch , couchdb_changes , dead_letter_queue , **elasticsearch** , exec ,
+**file** , ganglia , gelf , generator , github , google_cloud_storage , google_pubsub , graphite , heartbeat , http ,
+http_poller , imap , irc , **jdbc** , jms , jmx , **kafka** , kinesis , log4j, lumberjack , meetup , pipe , puppet_facter ,
+rabbitmq , **redis** , relp , rss , s3, salesforce , snmp , snmptrap , sqlite , sqs , stdin , stomp , **syslog** , **tcp** , twitter ,
+udp , unix , varnishlog , websocket , wmi e xmpp
+
+Obs.: Para configurar o arquivo do logstash é simples, o código já vem pronto. Basta ver qual pluginj será necessário para fazer conexão.
+
+Exemplo plugin file:
+
+opipeline/logstash.conf
+input {
+	file {
+		id => "test_log_sem_gz" //Id que você escolhe para o plugin
+		path => "/var/log/*.log" //Diretório que fará a leitura dos arquivos que estiver nele. Pode ter vários. 
+		exclude=> " *.gz" //Todo mundo que for alguma coisa.gz ele não fará a leitura.
+	}
+}
+
+Plugins de Saída
+
+oPermite o envio de dados de evento para um destino específico
+•https://www.elastic.co/guide/en/logstash/7.9/output-plugins.html
+
+oPlugins de saída
+•Boundary , circonus , cloudwatch , **csv** , datadog , datadog_metrics , elastic_app_search , **elasticsearch** ,
+email , exec , **file** , ganglia , gelf , google_bigquery , google_pubsub , graphite , graphtastic , **http** , influxdb ,
+irc , juggernaut , kafka , librato , loggly , lumberjack , metriccatcher , mongodb , nagios , nagios_nsca ,
+opentsdb , pagerduty , pipe , rabbitmq , redis, redmine , riak , riemann , s3, sns , solr_http , sqs , statsd ,
+**stdout** , stomp , syslog , **tcp** , timber , udp , webhdfs , websocket , xmpp e zabbix
+
+Exemplo
+
+opipeline/ logstash.conf
+output {
+	stdout{	//Especifica o formato de saída
+		codec =>json
+	}
+	elasticsearch{	//Local de envio
+		hosts => [ "localhost:9200" ] //Destino
+		index => "testes-%{+YYYY.MM.dd}" //Transformação a mais, alterando o index.
+	}
+}
+
+Plugins de Filtro
+
+oPermite o processamento intermediário em um evento
+•https://www.elastic.co/guide/en/logstash/7.9/filter-plugins.html
+
+oPlugins de Filtro
+•**Aggregate** , alter , bytes, cidr , cipher , clone, **csv** , date, de_dot , dissect , dns , drop , elapsed , **elasticsearch** ,
+environment , extractnumbers , fingerprint , geoip , **grok** , http, i18n, jdbc_static , jdbc_streaming , json ,
+json_encode , kv , memcached , metricize , metrics , **mutate** , prune , range, ruby , sleep , **split** , syslog_pri ,
+throttle , tld , translate , truncate , urldecode , useragent , uuid e xml
+
+Exemplo
+
+opipeline/ logstash.conf
+filter{
+mutate { "convert " => [ "bytes" , "integer " ]}
+mutate { "convert " => [ "duration" , "float " ]}
+}
+
+Obs.: Essa é uma tranformação de transformar os dados antes deles chegarem, ex: talvez chegassem tudo como string. Isso é importante pois, se enviar os dados como bytes e duração como string, e depois precisar fazer essa alteração, seria necessário reindexar todos os dados para alterar o mapeamento. Assim, já é aplicado todo o filtro de separar, mesclar ou dividir em mais campos, etc.
+
