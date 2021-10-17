@@ -34,12 +34,16 @@ Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para eng
 - KSQL Datagen | Schema Registry 
 - Kafka Connect e Clients | Cloud | Configurações e Boas Práticas
 
-### [ELASTIC - ESSENCIAL I]🚧[Em andamento]
+### <img src="https://media.badgr.com/uploads/badges/assertion--0JWlheJRGudz3OL_FTw6Q.png" width="70"><a href="https://badgr.com/backpack/badges/616c3ac45281534faeb6ef3c" target="_blank">ELASTIC - ESSENCIAL</a>
 
 - Introdução ao Elastic e Instalação
 - Requisições para Elasticsearch | Operações em Massa
 - API de Pesquisa | API de Índices
 - Queries e Filtros
+- Analyzer | Aggregations
+- Ingestão de Dados com FileBeats (FileBeats/MeetricBeats/HeartBeats)
+- Ingestão de Dados com Logstash
+- Kibana
 
-### [SPARK - BIG DATA PROCESSING]
+### [SPARK - BIG DATA PROCESSING] I🚧[Em andamento]
 
