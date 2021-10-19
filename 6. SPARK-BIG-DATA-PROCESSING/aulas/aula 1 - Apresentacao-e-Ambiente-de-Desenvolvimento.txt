@@ -1,0 +1,23 @@
+Baixar Cluster de Big Data
+oBaixar conteudo do Cluster
+git clone https://github.com/rodrigo-reboucas/docker-bigdata.git spark
+
+oBaixar as imagens
+docker-compose -f docker-compose-completo.yml pull
+
+**Obs.: Não é necessário baixar todas as imagens, pois não será usado todas. baixar somente o necessário. Usar a imagem parcial.**
+
+oListar as imagens
+docker image ls
+oIniciar todos os serviços
+docker-compose -f docker-compose-completo.yml up -d
+
+oArquivo: docker compose parcial.yml
+•Remover ~8GB
+oBaixar as imagens parcial
+docker-compose -f docker-compose-parcial.yml pull
+oListar as imagens parcial
+docker image ls
+oIniciar todos os serviços parcial
+docker-compose -f docker-compose-parcial.yml up -d
+
