@@ -1,0 +1,61 @@
+Sessão Spark
+oCriar sessão Spark
+•Configurar nós
+•Configurar o projeto
+oClasse SparkSession fornece o acesso às funcionalidades do spark
+•sql Executa as consultas Spark SQL
+•catalog Gerenciar tabelas
+•read função para ler dados de um arquivo ou outra fonte de dados
+•conf objeto para gerenciar configurações de Spark
+•sparkContext Core Spark API
+`spark = SparkSession.builder.appName("Python").getOrCreate()`
+
+Log
+oSpark usa log4j para logging
+•Configurações do log em conf/log4j.properties.
+Obs.: Em alguns lugares poderá ter conf/log4j.properties.template. Só apagar o .template para habilitar o arquivo log de configuração e editá-lo.
+
+oÉ nesse aquivo que ficam as avaliações dos níveis de log:
+•TRACE
+•DEBUG
+•INFO (default level in Spark applications)
+•WARN (default level in Spark shell)
+•ERROR
+•FATAL
+•OFF (desligar)
+oSetar o nível do log:
+•Ex: spark.sparkContext.setLogLevel("INFO")
+
+**Obs.: Estudar sobre como funciona o log4j**
+
+API Catalog
+
+| Scala                      | Python                     |
+| -------------------------- | -------------------------- |
+| spark.catalog              | spark.catalog              |
+| listDatabases              | listDatabases              |
+| setCurrentDatabase(nomeBD) | setCurrentDatabase(nomeBD) |
+| listTables                 | listTables                 |
+| listColumns(nomeTabela)    | listColumns(nomeTabela)    |
+| dropTempView(nomeView)     | dropTempView(nomeView)     |
+
+------
+
+API Catalog
+
+Scala
+
+`scala> val tabDF = spark.sql ("select * from bdtest.user ").show(10)`
+`scala> spark.catalog.listDatabases.show()`
+`scala> spark.catalog.setCurrentDatabase("bdtest")`
+`scala> spark.catalog.listTables.show()`
+`scala> val tabDF = spark.sql("select * from user").show(10)`
+
+Python
+
+`tab_df = spark.sql("select * from bdtest.user").show(10)`
+`spark.catalog.listDatabases()`
+`spark.catalog.setCurrentDatabase("bdtest")`
+`spark.catalog.listTables.show()`
+`tab_df = spark.sql("select * from user").show(10)`
+
