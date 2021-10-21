@@ -34,7 +34,7 @@ Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para eng
 - KSQL Datagen | Schema Registry 
 - Kafka Connect e Clients | Cloud | Configurações e Boas Práticas
 
-### <img src="https://media.badgr.com/uploads/badges/assertion--0JWlheJRGudz3OL_FTw6Q.png" width="70"><a href="https://badgr.com/backpack/badges/616c3ac45281534faeb6ef3c" target="_blank">ELASTIC - ESSENCIAL</a>
+### <img src="https://media.badgr.com/uploads/badges/assertion--0JWlheJRGudz3OL_FTw6Q.png" width="70"><a href="https://badgr.com/public/assertions/616c3ac45281534faeb6ef3c" target="_blank">ELASTIC - ESSENCIAL</a>
 
 - Introdução ao Elastic e Instalação
 - Requisições para Elasticsearch | Operações em Massa
