@@ -1,0 +1,211 @@
+RDD (Resilient Distributed Dataset)
+
+oResilient Distributed Datasets
+•Resiliente - Recriar dado perdido na memória
+•Distribuído - Processamento no cluster
+•Datasets - Dados podem ser criados ou vir de diversos tipos de fontes
+
+oRDD são coleção de objetos distribuídos entre os nós do cluster, onde os dados são armazenados em diversas partições.
+
+oImutáveis
+
+oTipos de operações
+•Ação
+•Transformação
+
+| Ação: Retorna um valor | Transformação: Retorna um RDD |
+| ---------------------- | ----------------------------- |
+| Collect                | Map                           |
+| Count                  | Filter                        |
+| First                  | FlatMap                       |
+| Take                   | GroupByKey                    |
+| Reduce                 | ReduceByKey                   |
+| CountByKey             | AggregateByKey                |
+| Foreach                |                               |
+
+------
+
+**RDD - Leitura e visualização de dados**
+
+rdd = sc.textFile("entrada*")
+rdd: org.apache.spark.rdd.RDD[String]
+rdd.count()
+res2: Long = 12
+rdd.first
+res3: String = Big Data
+rdd.take(5)
+res1: Array[String] = Array(Big Data, 2019, Semantix, Hadoop, Semantix SP)
+
+Obs.: Mostrar dados - Cuidado para não estourar memória
+
+rdd.collect()
+rdd.foreach(println)
+#Mostrar os valores sem Array em Scala
+
+------
+
+**Transformações de Map e FlatMap**
+
+Scala
+
+rdd.take(2)
+res1: Array[String] = Array(Big Data, Semantix SP) //O retorno sempre será em letras menores
+
+val palavras = rdd.flatMap(x => x.split(" ")) //Função anônima
+
+val palavras = rdd.flatMap(_.split(" ")) //Operador Coringa o __. em Scala, é a mesma coisa que x=>x. 
+
+palavras.foreach(println)
+
+Python
+
+rdd.take(2)
+['Big Data', 'Semantix SP’] //O retorno sempre será em letras menores
+
+palavras = rdd.flatMap(lambda x: x.split(" ")) //A mesma função acima, só que em python
+
+palavras.collect() //A mesma visualização só que em python
+
+Obs.: Pesquisar sobre funções anônimas
+
+------
+
+**RDD - Map e FlatMap**
+
+Diferença entre map e flatMap?
+Map //Utilizado para quando não deseja mexer com a estrutura de dados
+FlatMap  //Utilizado para quando deseja mexer coma  estrutura de dados
+
+rdd.take(2)
+['Big Data', 'Semantix SP’]
+palavras = rdd.flatMap(lambda x: x.split(" "))
+palavras.collect()
+*['Big',*
+*'Data',*
+*‘Semantix',*
+*‘SP’]*
+palavras = rdd.map(lambda x: x.split(" "))
+palavras.collect()
+*[['Big', 'Data'],*
+*['Semantix’, ’SP’]]*
+
+**RDD - Transformações no Map**
+
+Scala
+
+val pMinuscula = palavras.map(_.toLowerCase)
+val pMaiuscula = palavras.map(_.toUpperCase)
+val pChaveValor = pMinuscula.map((_,1))
+pChaveValor.take(4)
+*res1: Array[(String, Int)] = Array((big,1), (data,1), (2019,1), (semantix,1))*
+
+Python
+
+pMinuscula = palavras.map(lambda linha : linha.lower())
+pMaiuscula = palavras.map(lambda linha : linha.upper())
+pChaveValor = pMinuscula.map(lambda palavra : (palavra,1))
+pChaveValor.take(4)
+*[(‘big’,1), (‘data’,1), (‘2019’,1), (‘semantix’,1)]*
+
+**RDD - Transformações de Filter**
+
+//Filter são usados para remover/reduzir os dados
+
+Scala
+Remover dados do RDD
+val filtroA = palavras.filter(_.startsWith("a"))
+val filtoTamanho = palavras.filter(_.lenght > 5)
+val numPar = numero.filter(_ % 2 == 0)
+
+oPython
+filtro_a = palavras.filter(lambda palavra: palavra.startswith("a"))
+filtro_tamanho = palavras.filter(lambda palavra: len(palavra)>5)
+num_par = numeros.filter(lambda numero: numero % 2 == 0)
+
+**RDD - Transformações de Reduce**
+
+Scala
+val pChaveValor = pMinuscula.map((,1))
+pReduce = pChaveValor.reduceByKey(+_)
+pReduce.take(3)
+*res4: Array[(String, Int)] = Array((big,1), (2019,2), (hadoop,4))*
+
+Python
+p_chave_valor = pMinuscula.map(lambda palavra : (palavra,1))
+p_reduce = p_chave_valor reduceByKey (lambda key1, key2: key1 + key2)
+pReduce.take(3)
+[(‘big',
+(2019’, 2),
+*(‘hadoop’, 4)]*
+
+------
+
+**RDD - Transformações de Ordenação**
+
+Scala
+val pOrdena = pReduce.sortBy(-_._2)
+*pOrdena: org.apache.spark.rdd.RDD[(String, Int)]*
+val pOrdena.take(4)
+*res25: Array[(String, Int)] = Array((hadoop,4), (semantix,3), (data,3), (2019,2))*
+
+Python
+p_ordena = p_reduce.sortBy(lambda palavra: palavra[1], False) //fase é a mesma coisa que colocar (lambda palavra: -palavra[1])
+p_ordena.take(4)
+*[('hadoop', 4),*
+*('semantix', 3),*
+*('data', 3),*
+*('2019', 2)]*
+
+------
+
+**RDD - Visualização de dados**
+
+Obs.: Em BigData normalmente não se utiliza visualizações. Evitar o máxímo o uso de collect, pois ele trás todas as partições para um único nó. Normalmente se salva os dados diretamente.
+
+Scala
+pOrdena.foreach(y => println(y._1 + "--" + y._2))
+hadoop - 4
+semantix - 3
+data - 3
+2019 - 2
+sp - 2
+big - 1
+curso - 1
+
+Python
+lista = p_ordena.collect()
+for row in lista:
+	print(row[0],"-",row[1])
+hadoop - 4
+semantix - 3
+data - 3
+sp - 2
+2019 - 2
+big - 1
+curso - 1
+
+**RDD - Armazenamento de dados**
+
+p_ordena.getNumPatitions //Salvar 3 parte no mesmo nó.
+*3*
+p_ordena.saveAsTextFile("saida") // saida é a o caminho que está configurado onde o Spark foi configurado no HDFS hdfs dfs -ls user/usuario, se for docker, normalmente é o root. Mas é bom colocar o caminho completo.
+
+$ hdfs dfs -ls /user/root/saida
+*part-00000 part-00001 part-00002 _SUCCESS*
+
+------
+
+Partições
+oSpark armazena os dados do RDD em diferentes partições
+oMínimo de partições é 2
+oDefinir partições manualmente na leitura e redução do dado
+
+rdd = sc.textFile("entrada*“, 6)
+palavras = rdd.flatMap(lambda linha: linha.split(" "), 3) #ERRO
+p_chave_valor = palavras.map (lambda palavra: (palavra,1), 20) #ERRRO
+p_reduce = p_chave_valor.reduceByKey(lambda key1, key2: key1 + key2,10)
+p_reduce5 = p_reduce.repartition(5)
+pReduce.getNumPartitions()
+
+Obs.: As funções flatMap() e Map() não é possível aplicar redução de partições.
+
