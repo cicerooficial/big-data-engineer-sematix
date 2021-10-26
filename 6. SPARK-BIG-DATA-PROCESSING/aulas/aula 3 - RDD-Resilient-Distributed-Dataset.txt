@@ -207,5 +207,8 @@ p_reduce = p_chave_valor.reduceByKey(lambda key1, key2: key1 + key2,10)
 p_reduce5 = p_reduce.repartition(5)
 pReduce.getNumPartitions()
 
-Obs.: As funções flatMap() e Map() não é possível aplicar redução de partições.
-
+Obs.: 
+1. As funções flatMap() e Map() não é possível aplicar redução de partições.
+2. Video Aulas Complementares: 
+Função Lambda e funções anônimas (Python para machine learning - Aula 7): https://www.youtube.com/watch?v=G3COxzJ1SW0
+PythonFuncional: https://wiki.python.org.br/PythonFuncional
