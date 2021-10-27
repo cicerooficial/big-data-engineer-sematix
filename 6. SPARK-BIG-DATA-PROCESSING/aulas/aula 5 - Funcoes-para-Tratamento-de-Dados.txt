@@ -1,0 +1,170 @@
+Funções para tratamento de dados
+
+**Opções de Leitura em CSV**
+
+Leitura de Arquivo CSV
+`data = spark.read.`
+			`option(“sep”,“|”). // SEP para falar quem será o separador de cada campo ou delimitador`
+			`option(“header”,”true”).`
+			`option(“quote”," \ '" é a mesma coisa de \' que é o default`
+			`option( “mode”,”DROPMALFORMED"). //Se tiver algum arquivo que não esteja no formato, será ignorado`
+			`csv(“hdfs:///user/teste/”)`
+
+`from pyspark.sql import Row`
+`Name = Row("cod","nome")`
+`data = [Name(1,"Rodrigo"),Name(2,"Reboucas")]`
+`data_frame = spark.createDataFrame(data)`
+`print(data_frame.printSchema())`
+`data_frame.show()`
+`data_frame.write.csv("hdfs:///user/cicero/teste_csv",mode="overwrite",header="true")` #Colocando o option sep="" irá alterar a delimitação para o que for indicado
+
+Leitura de Dados
+`spark.read.csv("hdfs:///user/cicero/teste_csv", header="true").show()` #Tirar os espaçamentos ignoreLeadingWhiteSpace no início
+
+------
+
+**Comandos com WithColumn**
+
+oWithColumn
+•Editar ou Criar Colunas
+•Sintaxe: <dataframe>.withColumn(“<nomeColuna>”, <Coluna>) //<nomeColuna> é a coluna que será alterada/criada. <Coluna> é a coluna que será usada como modelo, replicando todos os dados nela.
+`data = spark.read.`
+			`option(“sep”,“|”).`
+			`option(“header”,”true”).`
+			`option(“quote"," \ ' ").`
+			`option( “mode”,”DROPMALFORMED”).` 
+			`csv(“hdfs:///user/teste/”)`
+`addColumn = data.withColumn(("Novo Campo",col("id"))`
+
+Acesso a coluna de DataFrame/DataSet em:
+
+| Scala              | Python                                                  |
+| ------------------ | ------------------------------------------------------- |
+| col("campo")       | from pyspark.sql.functions import col<br />col("campo") |
+| dataframe("campo") | dataframe["campo"]                                      |
+| $"campo"           | dataframe.campo                                         |
+
+dataframe.select(*cols)
+//O * do select aceita a String de um campo ou uma estrutura de coluna como o datafram.campo ou dataframe["campo"].
+dataframe.withColumn(colName, col) // Diferente do withColumn que não aceita essa estrutura de campo.
+
+------
+
+**Comandos com WithColumn**
+
+oFunções
+
+Timestamp
+
+WithColumn - Trabalhando com Timestamp
+oConverter Coluna para timestamp
+•`unix_timestamp(col(“<ColString>"), “<FormatoAtual>"),`
+oAlterar formato de Coluna de timestamp
+•`from_unixtime(<ColTimestamp >, "<FormatoConversão>"))`
+
+`from pyspark.sql.functions import unix_timestamp,from_unixtime`
+`formato = data.select(“data”).show(1) // formato = 2020/10/25` //Formato é um dataframe
+`convUnix = formato.withColumn("timestamp", unix_timestamp(col("data"), "yyyy/MM/dd"))` //Criando um data frame com coluna no novo formato
+`convUnixData = convUnix.withColumn(“new data", from_unixtime("timestamp", "MM-dd-yyyy"))`
+
+`convDataDireto = formato.withColumn(“mes-dia-ano", from_unixtime(unix_timestamp(col("data"), "yyyy/MM/dd"), "MM-dd-yyyy"))`
+
+Substring
+
+WithColumn - Trabalhando com Substring
+o Extrair dados de uma coluna de acordo com uma posição //O que vai ser retirado da coluna
+oSintaxe:
+<dataframe>.withColumn(“<nomeColuna>", substring(“<ColunaExistente>”, <posicaoInicial>, <tamanho>)
+oMuito usado com concat para concatenar as colunas e strings
+
+`formato = data.select(“data”).show(1) // data = 2020/10/25`
+`mes= formato.withColumn(“mes" ,substring(col("data"),6,2)) //mes = 10`
+
+`codsDF = data.select(“codigo”) // código = AA150000CCS`
+`resumoCod = codsDF.withColumn(“pedido" , concat(substring(col(“codigo"), 1, 2), lit(“--”), substring(col(“codigo"), 9, 3)) //pedido = AA CCS`
+
+Split
+
+WithColumn - Trabalhando com Split
+oSplit
+•Criar um array de acordo com um delimitar
+•
+Sintaxe:
+<dataframe>.withColumn(“<nomeColuna>", split(“<Coluna>”, ”<delimitador” ))
+
+`nomesDF = data.select(“nome”).show(1) // nome = Rodrigo Augusto Rebouças`
+`sepNomesDF = nomesDF.withColumn(“sepNome",split(col(“nome“), " "))`
+`sepNomesDF.printSchema()`
+*|--nome: string (nullable = true)*
+*|--sepNome: array (nullable = true)*
+`valpNome = sepNomesDF.withColumn(“pNome", col(“sepNome“). getItem(0)).drop(“sepNome")`
+
+------
+
+Comandos com WithColumn
+oFunções
+cast
+
+WithColumn - Trabalhando com Cast
+oCast: Alterar o tipo do dado
+•Sintaxe:
+•<dataframe>.withColumn(“<nomeColuna>", coluna>.cast(“Tipo” ))
+oAlterar as casas decimais
+format_number(“<coluna>”, <numeroCasasDecimais>))
+
+`medida = data.select(“total”).show(1) // total = 1000.00 (String)`
+`from pyspark.sql.types import *`
+`converter = medida.withColumn(“Total real", col(“total").cast(FloatType()))` //Forma1
+`converter2c = converter.withColumn(“Total real", format_number(col(“Total real").cast(FloatType()), 2)` //Forma2
+
+regexp_replace
+
+WithColumn - Trabalhando com Cast e regexp_replace
+oRegexp
+• Usado quando precisa alterar um padrão com uso de regex
+regexp_replace(“<coluna>”, “<padrão_atual>", “<novo_padrão>"))
+oUsado para fazer cast de decimais para substituir , por .
+
+`medida = data.select(“total”).show(1) // total = 1.000,00 (String)`
+`medidaR = medida.withColumn(“total”, regexp_replace(col(“total“), "\\.", "")) // total = 1000,00 (String)`
+`medidaR = medidaR.withColumn(“total”, regexp_replace(col(“ "valor“), "\\,", ".")) // total = 1000.00 (String)`
+`from pyspark.sql.types import *`
+`converter = medidaR.withColumn(“Total real", col(“total").cast(FloatType())) // total = 1000.00 (Float)`
+
+when
+
+WithColumn - Trabalhando com when
+oWhen
+•Responsável por fazer condicional em colunas
+•Sintaxe:
+<dataframe>.withColumn(“<nomeColuna>", when(<condição>, <valorVerdadeiro>).otherwise(<valorFalso>)
+
+`codigos = data.select(“cod”).take(5)` *// cod= { AABB, ACBB,00 ABCC, AACC, 00 BBCC}*
+`remover_zeros = codigos.withColumn("cod_sem 0", when(length(col("cod")) > 4, substring(col("cod"),3,4)).otherwise(col("cod")))`
+*//cod_sem_0 = { AABB, ACBB, ABCC, AACC,*
+
+------
+
+Agregações
+
+Dataframe - Agregações
+<dataframe>.groupBy(<coluna>).agg(<f_agg>)
+•count
+•avg
+•sum
+•min
+•max
+•first
+•last
+•countDistinct
+•approx _count_distinct
+•stddev
+•var _sample
+•var_pop
+•covar_samp
+•covar_pop
+•corr
+
+peopleDF.groupBy("setor ").sum("gastos").sort(desc("gastos"))
+peopleDF.groupBy("setor").agg(avg("gastos"), sum("gastos").alias("total_gastos"))
+
