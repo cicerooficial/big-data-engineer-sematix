@@ -1,0 +1,36 @@
+Spark application
+
+**Spark shell x Spark applications**
+oSpark shell
+	•Exploração e manipulação dos dados
+oSpark applications
+	•Rodar os programas de forma independente
+	•Jobs para ETL e streaming
+	•Criação de objetos
+		oSparkSession - spark (spark SQL)
+		oSparkContext - sc
+
+**Rodar uma Spark application**
+ospark submit class NameList MyJarFile.jar people.json namelist/
+oOpções submit
+•master: local, yarn, mesos ou spark standalone
+•jars: adicionar arquivos jar
+•py files: lista de arquivos em .py, .zip ou .egg
+•driver java options: parâmetros para o driver JVM
+•deploy mode: client ou cluster
+•driver memory: Memória alocada para o spark driver (1G)
+•executor memory: Memória alocada para a aplicação //Normalmente quanto de memória tem no cluster
+•num executors: Número de executores para iniciar com a aplicação
+•driver cores: Número de cores alocados para o spark driver
+•queue: Rodar na fila do Yarn
+•help
+
+**Build Spark**
+oIntelliJ
+•sbt package
+ohttps://www.scala-sbt.org/sbt-native-packager/gettingstarted.html#setup
+oPycharm
+•pip install
+ohttps://packaging.python.org/tutorials/installing-packages/
+
+Como realizar Build no Spark: https://spark.apache.org/docs/latest/building-spark.html
