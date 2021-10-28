@@ -66,7 +66,7 @@ $ juros_valor = juros_ano.withColumn("valor", regexp_replace(col("valor"), "\,",
 $ juros_relatorio_anual = juros_valor.groupBy("ano").agg(count("ano").alias("meses"),
                                                  format_number(avg("valor"), 2).alias("valor medio"),
                                                  min("valor").alias("valor mínimo"),
-                                                 max("valor").alias("valor máximo")).sort(desc("ano"))
+                                                 max("valor").alias("valor máximo")).sort(desc("ano")).withColumnRenamed('ano', 'Anual')
 $ juros_relatorio_anual.show()
 
 3. Salvar no hdfs:///user/<nome>/relatorioAnual com compressão zlib e formato orc
