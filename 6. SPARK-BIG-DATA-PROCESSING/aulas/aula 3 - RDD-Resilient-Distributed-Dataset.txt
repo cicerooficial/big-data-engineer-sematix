@@ -212,4 +212,3 @@ Obs.:
 2. Video Aulas Complementares: 
 2.1 Função Lambda e funções anônimas (Python para machine learning - Aula 7): https://www.youtube.com/watch?v=G3COxzJ1SW0
 2.2 PythonFuncional: https://wiki.python.org.br/PythonFuncional
-2.3 Python Lambda: https://www.w3schools.com/python/python_lambda.asp
