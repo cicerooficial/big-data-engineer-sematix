@@ -1,0 +1,117 @@
+Spark Streaming
+
+
+
+Ferramentas
+o**Spark**
+•ETL e processamento em batch
+oSpark SQL
+•Consultas em dados estruturados
+o**Spark Streaming**
+•Processamento de stream
+oSpark MLib
+•Machine Learning
+o**Spark GraphX**
+•Processamento de grafos
+
+Spark Streaming
+oAbstração de alto nível do core do Spark. 
+	•Que por baixo é um RDD discreto Dstreams (Discretized Streaming)
+	•Representa um Stream contínuo de dados, ler dado, processar o dado, salvar o dado e novamente ler dado, processa , salva, ... 
+oExtensão da API core do Spark
+	•Processamento escalonável
+	•Alta taxa de transferência
+	•Tolerante a falhas de stream de dados
+
+Spark Streaming
+oRecebe fluxos de dados de entrada e divide os dados em lotes
+	•Processados pela engine do Spark para gerar o stream final de resultados em bath
+oDStream é representado como uma sequência de RDDs
+
+Input data stream -> Spark Streaming -> batches(microdados) de entrada -> Spark Engine -> Batches do processo de dados
+
+------
+
+Spark Streaming - Leitura de Dados
+
+Dstream - Leitura Básica
+Devido o Spark Stream ser um outro tipo de dados, é necessário criar um novo contexto.
+
+oCriar um Contexto com Intervalo de 2 segundos
+
+| Scala                                            | Python                                           |
+| ------------------------------------------------ | ------------------------------------------------ |
+| `import org.apache.spark._`                      | `from pyspark import SparkContext`               |
+| `import org.apache.spark.streaming._`            | `from pyspark.streaming import StreamingContext` |
+| `val conf = new SparkConf().setMaster("local")`  | `conf = SparkConf().setMaster("local")`          |
+| `val sc = new SparkContext(conf)`                | `sc = SparkContext.getOrCreate(conf)`            |
+| `val ssc = new StreamingContext(sc, Seconds(2))` | `ssc = StreamingContext(sc,2)`                   |
+
+oCriar um Dstream para captura dos dados relativos a sessão da porta 9999
+
+| Scala                                                 | Python                                            |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| `val dstr = ssc.socketTextStream ("localhost", 9999)` | `dstr = ssc.socketTextStream ("localhost", 9999)` |
+
+Dstream - Ex. Leitura e Exibição de uma Porta
+oExemplo de leitura na porta 9999 no localhost
+
+**Python**
+`from pyspark.streaming import StreamingContext`
+`ssc = StreamingContext(sc,2)`
+`readStr = ssc.socketTextStream("localhost",9999)`
+`readStr.pprint()`
+`ssc.start()` //Antes de iniciar abrir em uma nova janela e iniciar o comando abaixo, para ficar aguardando as informações.
+
+oO código só será inicializado se iniciar o Stream context na porta indicada. Usar Netcat para enviar dados na porta 9999 antes de iniciar o start().
+
+`$ nc -lp 9999`
+
+------
+
+Spark Streaming - Operações
+
+São as mesmas operações do RDD, já que por baixo o Spark Streaming é um RDD
+
+| Ação: Retorna um valor | Transformação: Retorna um DStream |
+| ---------------------- | --------------------------------- |
+| Count                  | Map                               |
+| CountByValue           | Filter                            |
+| Reduce                 | FlatMap                           |
+| Print                  | ReduceByKey                       |
+| ForeachRDD             |                                   |
+
+o**Flatmap**
+`from pyspark.streaming import StreamingContext`
+`ssc = StreamingContext(sc,2)`
+`readStr = ssc.socketTextStream("localhost",9999)`
+`palavras = readStr.flatMap(lambda linha: linha.split(" "))`
+`palavras.saveAsTextFiles(“hdfs://localhost/linha”)`
+`ssc.start()`
+
+o**Transformações de Map**
+`pMinuscula = palavras.map(lambda palavra: palavra.lower())`
+`pMaiuscula = palavras.map(lambda palavra: palavra.upper())`
+
+o**Filtrar dados**
+`filtro_a = palavras.filter(lambda palavra: palavra.startswith("a"))`
+`filtro_tamanho = palavras.filter(lambda palavra: len(palavra)>5)`
+`num_par = numeros.filter(lambda numero: numero % 2 == 0)`
+
+------
+
+Spark Streaming - Contar Palavras
+oExemplo de contar palavras dos dados na porta 9999 no localhost
+
+`import org.apache.spark.streaming._`
+`ssc = StreamingContext(sc, 1)`
+`readStr = ssc.socketTextStream("localhost“,9999)`
+`palavras = readStr.flatMap(lambda linha: linha.split(" "))`
+`pMinuscula = palavras.map(lambda palavra: palavra.lower())`
+`pChaveValor = pMinuscula.map(lambda palavra: (palavra,1)`
+`pReduce = pChaveValor.reduceByKey(lambda key1,key2: key1+key2)`
+`pReduce.pprint()`
+`ssc.start()`
+
+Obs.: O SparkStream é a única forma de se trabalhar com stream de dados. Existem uma outra forma chamada StructStream que é parecido com um DataSet.
+
