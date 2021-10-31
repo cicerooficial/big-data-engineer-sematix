@@ -51,10 +51,10 @@ Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para eng
 - ✅Projeto em Python
 - ✅RDD(Resilient Distributed Dataset)
 - ✅Spark Schema | DataSet
-- Funções para Tratamento de Dados
-- Construção e Padrão de Data Application | Spark Application
-- Spark Streaming
-- Spark Stream e Kafka 
-- Struct Streaming | Struct Streaming com Kafka
-- Otimização da Aplicação 
+- ✅Funções para Tratamento de Dados
+- ✅Construção e Padrão de Data Application | Spark Application
+- ✅Spark Streaming
+- ✅Spark Stream e Kafka 
+- ✅Struct Streaming | Struct Streaming com Kafka
+- ✅Otimização da Aplicação 
 
