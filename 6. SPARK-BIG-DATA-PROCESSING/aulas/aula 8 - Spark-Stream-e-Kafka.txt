@@ -1,0 +1,144 @@
+Spark & Kafka
+
+oFormas de integrar Kafka no Spark, já que é um dos softwares mais utilizados para realizar processos de Stream.
+	•Spark Streaming (DStreams)
+		oVersão >= Spark 0.7.0
+		ohttps://spark.apache.org/docs/2.4.1/streaming-kafka-integration.html
+	•Structured Streaming
+		oVersão >= Spark 2.0.0 (2.3)
+		ohttps://spark.apache.org/docs/2.4.4/structured-streaming-kafka-integration.html
+
+Spark Streaming com Kafka
+
+|                            | spark-streaming-kafka-0-8 | spark-streaming-kafka-0-10 |
+| -------------------------- | ------------------------- | -------------------------- |
+| Broker Version             | 0.8.2.1 or higher         | 0.10.0 or higher           |
+| API Maturity               | Deprecated Spark 2.3      | Stable                     |
+| Language Support           | Scala, Java, Python       | Scala, Java                |
+| Receiver DStream           | Yes                       | No                         |
+| Direct DStream             | Yes                       | Yes                        |
+| SSL / TLS Support          | No                        | Yes                        |
+| Offset Commit API          | No                        | Yes                        |
+| Dynamic Topic Subscription | No                        | Yes                        |
+
+ohttps://spark.apache.org/docs/2.4.1/streaming-kafka-integration.html
+
+oSpark Streaming (DStreams)
+	•Scala e Java
+		oVersão >= Spark 0.7.0
+		ohttps://spark.apache.org/docs/latest/streaming-kafka-0-10-integration.html
+	•Python
+		oVersão >= Spark 1.2
+		oVersão <= Spark 2.3
+		ohttps://spark.apache.org/docs/2.4.1/api/python/pyspark.streaming.html#pyspark.streaming.kafka.KafkaUtils
+oReceber dados de um ou mais tópicos do Kafka
+	•Configurar os parâmetros do StreamContext
+	•Configurar os parâmetros do Kafka
+	•Configurar o Dstreams para leitura dos tópicos
+
+------
+
+Revisão de Kafka
+
+Exemplos de comandos no Kafka
+oAcessar o container do Kafka
+•`docker exec -it kafka bash`
+oCriação de tópico
+•`kafka-topics --bootstrap-server kafka:9092 --topic topicTeste --create --partitions 1 --replication-factor 1`
+oCriação do produtor
+•`kafka-console-producer --broker-list kafka:9092 --topic topicTeste`
+oCriação do consumidor
+•`kafka-console-producer --bootstrap-server kafka:9092 --topic topicTeste`
+
+oCriação do produtor com Chave/Valor
+•`kafka-console-producer --broker-list kafka:9092 --topic topicTeste --property parse.key=true --property key.separator=,`
+oCriação do produtor enviando um arquivo
+•`kafka-console-producer --broker-list kafka:9092 --topic topicTeste < file.log`
+oCriação do produtor enviando um arquivo com Chave/Valor
+•`kafka-console-producer --broker-list kafka:9092 --topic topicTeste --property parse.key=true --property key.separator=: < file.log`
+
+------
+
+Dependências do Spark Streaming com Kafka 0.10
+
+oAdicionar pacote do Kafka
+	`--packages org.apache.spark:spark-streaming-kafka-0-10_<versãoScala>:<versãoSpark>`
+oExemplo
+•$ kafka-topics --version
+
+2.3.0
+	oLink: https://docs.confluent.io/current/installation/versions-interoperability.html
+		•Confluent Platform: 5.3.x (Ex. 5.3.1 css)
+		•Apache Kafka: 2.3.x
+•$ spark-shell
+	oScala: 2.11.12
+	oSpark: 2.4.1
+o$ `spark-shell --packages org.apache.spark:spark-streaming-kafka-0-10_2.11:2.4.1`
+oSe estiver utilizando IntelliJ com SBT: `libraryDependencies += "org.apache.spark" % "spark-streaming-kafka-0-10" % "2.4.1"`
+
+------
+
+Estrutura do código e importações
+oProcessos básicos para Leitura de dados do Kafka
+`scala> import ...`
+`scala> val ssc = new StreamingContext ( …)`
+`scala> val kafkaParams = Map[String, Object]( ... )`
+`scala> val dstream = KafkaUtils.createDirectStream[String, String]( ... )`
+`scala> dstream.map( ... )`
+`scala> ssc.start()`
+
+Importar packages
+oPackages do Kafka 010 e Streaming
+`scala> import org.apache.kafka.clients.consumer.ConsumerRecord`
+`scala> import org.apache.kafka.common.serialization.StringDeserializer`
+`scala> import org.apache.spark.streaming.{Seconds, StreamingContext}`
+`scala> import org.apache.spark.streaming.kafka010._`
+`scala> import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent`
+`scala> import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe`
+
+o Parâmetros do Kafka
+oUsar API Kafka para configuração
+`scala> val kafkaParams = Map[String, Object](
+	"bootstrap.servers" --> "localhost:9092",
+	"key.deserializer" --> classOf[StringDeserializer],
+	"value.deserializer" --> classOf[StringDeserializer],
+	"group.id" --> "app teste",
+	"auto.offset.reset" --> "earliest" //earliest irá ler os dados desde quando foi criado. latest irá ler os dados a partir da inicialização. 
+	"enable.auto.commit" --> (false: java.lang.Boolean)
+)`
+
+oCriação e Visualização do DStream
+
+oLocation Strategies //Definir as estratégias
+	•PreferConsistent
+		oDistribuir partições uniformemente entre os executores disponíveis. Aqui ele irá tentar distribuir as partições entre os executores disponíveis. Ex:10 executores para 5 partições, ele tentará equibilibrar 2 executores para cada partição.
+	•PreferBrokers
+		oSe seus executores estiverem nos mesmos hosts que seus corretores kafka
+	•PreferFixed
+		oEspecifique um mapeamento explícito de partições para hosts
+oConsumer Strategies
+	•Subscribe
+		oInscrever se em uma coleção fixa de tópicos
+	•SubscribePattern
+		oUse um regex para especificar tópicos de interesse
+	•Assign
+		oEspecificar uma coleção fixa de partições
+
+oUsar estratégia do Kafka
+`scala> val ssc = new StreamingContext(sc,Seconds(10)`
+`scala> val topics = Array("topicA")`
+`scala> val dstream = KafkaUtils.createDirectStream[String, String]( ssc,
+																	[LocationStrategies.PreferConsistent,
+																	ConsumerStrategies.Subscribe[String, String](topics, kafkaParams)
+)`
+
+Visualizar DStream
+oMapear a estrutura do Tópico
+`scala> val info_dstream = dstream.map(record => (` //Criando o record para tudo o que ele irá receber
+																`record.topic,` //qual o tópcio que está lendo
+																`record.partition,` //qual partição está lendo
+																`record.key,` //qual a chave enviada
+																`record.value` //qual o valor enviado
+`))`
+`scala> info_dstream.print()`
+
