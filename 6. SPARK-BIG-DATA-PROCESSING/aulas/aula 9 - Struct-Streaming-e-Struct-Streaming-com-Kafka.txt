@@ -1,0 +1,144 @@
+Struct Streaming
+
+Conceitos
+
+oEngine de processamento de stream construído na engine do Spark SQL
+oConsultas do Spark Streaming são processadas usando uma engine de processamento de
+micro lote
+•Processar stream de dados como uma série de pequenos Jobs em batch
+•Latências de ponta a ponta de até 100 milissegundos
+•Tolerância de uma falha
+oNovo modelo de stream - **Continuous processing**
+•Spark >= 2.3
+•Latências de ponta a ponta tão baixas quanto 1 milissegundo
+•Tolerância de uma falha
+•Sem alterar as operações Dataset / DataFrame em suas consultas
+
+oTrata um stream de dados como uma tabela que está sendo continuamente anexada
+oModelo de processa	mento de stream muito semelhante a um modelo de processamento
+em lote
+
+oDocumentação do Struct Streaming: https://spark.apache.org/docs/2.4.1/structured-streaming-programming-guide.html
+
+Struct Streaming - Exemplo Socket
+
+oLeitura e Escrita de Stream
+
+oExemplo de leitura na porta 9999 no localhost
+read_str = spark.readStream.format("socket").option("host", "localhost").option("port", 9999).load()
+...
+write_str = readStr.writeStream.format("console").start()
+
+Obs.: Não tem como visualizar o console pelo jupyter_notebook. Só pelo terminal usando Spark Sheel ou pelo PySpark.
+
+Struct Streaming - Exemplo CSV
+oLeitura de um arquivo csv
+•Obrigatoriedade a definição do Schema
+•Leitura de diretório, não arquivo
+user_schema = StructType(). add(“nome", "string").add ("idade", "integer") //Forma de criar um Schema
+
+//Outra forma de criar um Schema
+read_csv_df = spark.**readStream**
+.schema user_schema ) //Tem que ter um schema
+.csv("/user/nomes/") //Pode utilizar todos os options normalmente. Tem que apontar um diretório, por estar lendo um stream de dados, colocando /*.csv ele irá levar só o que é csv.
+read_csv_df.printSchema()
+
+oSalvar dados
+•Orc
+•Json
+•Csv
+•Parquet
+
+read_csv_df.**writeStream**
+.format("csv")
+.option("checkpointLocation", "/tmp/checkpoint") //Não é obrigatório, mas dependendo do tipo de arquivo é importante definir o checkpoit para saber se foi de fato salvo o arquivo.
+.option("path", "/home/data")
+.start()
+
+------
+
+Struct Streaming com Kafka
+
+Conceitos
+
+oStructured Streaming
+	•Versão >= Spark 2.0.0 ( 2.3)
+	•https://spark.apache.org/docs/2.4.1/structured-streaming-kafka-integration.html
+oSpark Streaming
+	•Configurar os parâmetros do StreamContext
+	•Configurar os parâmetros do Kafka
+	•Configurar o Dstreams para leitura dos tópicos
+oStructured Streaming
+	•Configurar o Dataframe para leitura dos tópicos
+
+Leitura de dados do Kafka em Batch
+oCriação do Kafka Souce para consultas batch
+kafka_df = spark\
+**.read**\
+.format("kafka")\
+.option("kafka.bootstrap.servers", "host1:port1,host2:port2")\
+.option("subscribe", "topic1")\
+.load()
+
+Leitura de dados do Kafka em Stream
+oCriação do Kafka Souce para consultas streaming
+kafka_df = spark\
+.**readStream**\
+.format("kafka")\
+.option("kafka.bootstrap.servers", "host1:port1,host2:port2")\
+.option("subscribe", "topic1")\
+.option("startingOffsets", "earliest")\
+.load()
+
+Visualização e Escrita de Dados
+
+Visualizar dados do Kafka em Batch
+oPara visualizar a Chave e valor e necessário fazer cast
+kafka_df. printSchema
+root
+**|--*key: binary (nullable = true)***
+***|--value: binary (nullable = true)***
+*|--topic: string (nullable = true)*
+*|--partition: integer (nullable = true)*
+*|--offset: long (nullable = true)*
+*|--timestamp: timestamp (nullable = true)*
+*|--timestampType: integer (nullable = true)*
+
+kafka_df.select(col("key").cast(StringType), col("value").cast(StringType0).show()
+
+Visualizar dados do Kafka em Stream
+o Para visualizar a Chave e valor e necessário fazer castroot
+**|--*key: binary (nullable = true)***
+***|--value: binary (nullable = true)***
+*|--topic: string (nullable = true)*
+*|--partition: integer (nullable = true)*
+*|--offset: long (nullable = true)*
+*|--timestamp: timestamp (nullable = true)*
+*|--timestampType: integer (nullable = true)*
+
+kafka_df.select(col("key").cast(StringType), col("value").cast(StringType0).show()
+kafka_df.writeStream.format("console").start()
+
+Enviar dados Stream para o Kafka
+oFazer uso do Continuous Processing (
+•Registrar o progresso da consulta a cada x tempo com o Trigger Continuos
+•O número de tarefas exigidas pela consulta depende de quantas partições a consulta
+pode ler das fontes em paralelo (Núcleos(Cores) >= Partições)
+kafka_df.**writeStream**\
+.format("kafka")\
+.option(" kafka.bootstrap.servers ", "host1:port1,host2:port2")\
+.option("topic", "topic_teste2")\
+.**trigger(Trigger.Continuous ("1 second"))**\
+.start()
+
+Enviar dados Batch para o Kafka
+oObrigatório ter o campo value
+oOpcional ter o campo key
+dataframe
+.withColumnRenamed (“id”, “key")\
+.withColumnRenamed("nome ”, “value")\
+dataframe.**write**\
+.format("kafka")\
+.option("kafka.bootstrap.servers", "host1:port1,host2:port2")\
+.option("topic", "topic_teste2")\
+.save()
