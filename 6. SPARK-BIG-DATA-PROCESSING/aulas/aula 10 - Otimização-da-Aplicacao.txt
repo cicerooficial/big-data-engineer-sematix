@@ -1,0 +1,166 @@
+**Variáveis Compartilhadas**
+
+oQuando uma função é passada para o Spark, a operação é executada em um nó de cluster
+remoto
+	•Trabalha em cópias separadas de todas as variáveis usadas na função
+	•As variáveis são copiadas para cada máquina e nenhuma atualização nas variáveis na
+máquina remota é propagada de volta ao programa do driver
+	•A leitura e gravação entre tarefas é ineficiente
+oO Spark fornece dois tipos limitados de variáveis compartilhadas
+	•Broadcast
+	•Accumulators
+
+**Broadcast**
+oPara cada máquina no cluster terá uma variável somente para leitura em cache
+•Não é necessário enviar uma cópia dela para as tarefas
+oVariáveis de broadcast é útil quando
+•Quando precisa e quando usar? Em tarefas em vários estágios precisam dos mesmos dados
+•Importância de armazenar em cache os dados na forma desserializada
+
+**Broadcast Métodos** 
+oId Identificador único
+oValue Valor
+oUnpersist Exclui assincronamente cópias em cache da variável broadcast nos executores
+oDestroy Destrói todos os dados e metadados relacionados a variável de broadcast. Somente quando não for mais ter utilização dos dados.
+otoString Representação de string
+
+**Broadcast Exemplo**
+oSintaxe
+o<variavelBroadcast> = sc.broadcast(<valor>)
+broadcastVar = sc.broadcast( [1, 2, 3])
+type(broadcastVar)
+*pyspark.broadcast.Broadcast*
+broadcastVar.value
+*[1, 2, 3]*
+broadcastVar.destroy
+
+**Accumulators**
+oAcumuladores são variáveis que são apenas “adicionadas” a uma operação associativa e
+comutativa
+	•Paralelismo eficiente+
+	•Podem ser usados para implementar contadores
+	•Suporta acumuladores de tipos numéricos, e podem adicionar outros
+oO spark exibe o valor para cada acumulador modificado por uma tarefa na tabela “Tasks“
+oO rastreamento de acumuladores na interface do usuário pode ser útil para entender o
+progresso dos estágios em execução
+Obs.: Em Python, não é possível visualizar os dados do accumulador no visualizador (na porta localhost:4040). 
+
+**oCriar o acumulador**
+•sc. long/doubleAccumulator(valor, “<nomeAcumulador>”) Scala e view Spark’s UI
+•sc. Accumulator(valor) Python
+oAdicionar tarefas
+•<aculumator.add(Long/Double)
+
+**Scala**
+`scala> val accum = sc.longAccumulator(0, "My Accumulator")`
+`scala> sc.parallelize(Array(1, 2, 3, 4)).foreach(x => accum.add(x))`
+`scala> accum.value //10`
+
+**Python**
+`python accum = sc. Accumulator(0)`
+`python> sc.parallelize([1, 2, 3, 4]).foreach(lambda x: accum.add(x))`
+`python> accum.value //10`
+
+**Cache de tabelas**
+oArmazenar tabela em cache na memória
+`•spark.catalog.cacheTable("tableName")`
+`•dataFrame.cache()`
+oRemover tabela da memória
+`•spark.catalog.uncacheTable("tableName")`
+
+`spark.catalog.cacheTable("src")`
+`broadcast(spark.table("src")).join(spark.table("records"), "key").show()`
+`spark.catalog.uncacheTable("src")`
+
+------
+
+**UDF**
+
+oUser defined Function para Spark SQL
+	•Registrar função como UDF
+	•Comando:
+		ospark.udf.register(“<nomeUDF>”, <UserDefinedFunction>)
+
+| `scala> val quadrado = ((s: Long) => s` | `python> quadrado = (lambda s: s * s)` |
+| --------------------------------------- | -------------------------------------- |
+
+//Deixar a função udf padrão no spark:
+
+`spark.udf.register(“fQuad", quadrado)`
+`spark.range(1, 20).registerTempTable("test") `//range para quando quer testar operações numéricas
+`spark.sql("select id, fQuad(id) as id_quad from test")`
+
+**oUser defined Function para DataFrames**
+	•Comandos:
+		o<nomeUDF> = udf(<UserDefinedFunction>)
+
+scala> 
+`import org.apache.spark.sql.functions.{col, udf}`
+`scala> val fDfQuad = udf((s: Long) => s * s)`
+
+python>
+`frompyspark.sql.functions import col,udf`
+`def quadrado (s):`
+	`return s * s`
+`fDfQuad = udf(lambda s: quadrado(s))`
+
+`spark.range(1, 20).select(col(“id”), fDfQuad(col("id")))`
+
+**oRealmente é necessário criar?**
+	•Otimização
+	•Desempenho
+	•Documentação: https://spark.apache.org/docs/latest/api/sql/
+		Obs.: Usar UDF somente se não existir uma função na documentação.
+
+------
+
+**Tunning**
+
+**Deploy com alocação dinâmica**
+
+Obs.: Tudo depende da sua fila ou infraestrutura disponível.
+
+oParâmetros para utilizar os recursos do cluster
+	•--master $YARN
+		oExecutar o log local: $YARN = local
+		oExecutar no cluster: $YARN = yarn
+	•--deploy-mode cluster
+	•--conf "spark.dynamic.Allocation.enable=true"
+	•--conf "spark.shuffe.service.enable=true"
+	•--conf "spark.shuffe.service.port=7337"
+	•--conf "spark.dynamic.InitialExecutors=6"
+	•--conf "spark.dynamic.maxExecutors=9"
+	•--conf "spark.dynamic.minExecutors=3"
+
+**Deploy com alocação calculada**
+oConsiderar toda a capacidade da infra/fila
+oParâmetros para utilizar os recursos do cluster
+	•--master $YARN
+		oExecutar o log local: $YARN = local
+		oExecutar no cluster: $YARN = yarn
+	•--deploy-mode cluster
+	•--dirver-memory = 8G (recomendável)
+	•--executor-memory = int( (Memória total-10%) / num executors)
+	•--conf spark.yarn.driver.memoryOverhead = 10% de memoria
+	•--conf spark.yarn.executor.memoryOverhead = 10% dos executors
+	•--executors-core = 4 ou 5 no máximo, (mais que isso fica pesado)
+	•--num-executors = int ( (Cores total 10%) / executors core)
+
+Obs.: Se tiver vários jobs em paralelo, sempre dividir os recursos disponíveis pelo número de jobs. Ex: Rodar 10 jobs em paralelo, então fazer a conta e dividir por 10.
+
+------
+
+**Spark Connector**
+
+**Conexão com Spark**
+	oJdbc
+		•https://spark.apache.org/docs/latest/sql-data-sources-jdbc.html
+	oMongoDB
+		•https://docs.mongodb.com/spark-connector/current/
+	oRedis
+		•https://github.com/RedisLabs/spark-redis
+	oKafka
+		•https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
+	oElastic
+		•https://www.elastic.co/guide/en/elasticsearch/hadoop/current/spark.html
+
