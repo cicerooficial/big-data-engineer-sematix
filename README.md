@@ -45,7 +45,7 @@ Bootcamp promovido pela Semantix Inc. focado em ambientes e ferramentas para eng
 - ✅Ingestão de Dados com Logstash
 - ✅Kibana
 
-### [SPARK - BIG DATA PROCESSING] I🚧[Em andamento]
+### <img src="https://media.badgr.com/uploads/badges/assertion-PSJsoiqbScGAarcuqZtIdA.png" width="70"><a href="https://badgr.com/public/assertions/6184597f45a148214e3a7be0" target="_blank">SPARK - BIG DATA PROCESSING </a>
 
 - ✅Ambiente de Desenvolvimento
 - ✅Projeto em Python
