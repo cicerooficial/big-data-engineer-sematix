@@ -15,8 +15,25 @@ Treinamento promovido pela Semantix Inc. focado em ambientes e ferramentas para 
     <img src="https://img.shields.io/badge/Apache_Spark-FFFFFF?style=for-the-badge&logo=apachespark&logoColor=#E35A16"/>
 </p>
 
+----------
 
-## Trilhas Concluídas:
+Conhecimentos básicos necessários em:
+
+- Git;
+- SQL;
+- Python(Preferível), Java ou Scala.
+
+Requisitos necessários da máquina:
+- Sistema Operacional (Windows, Linux ou Mac OS) de 64 bits;
+- Memória RAM de 8GB (Mínimo), 16GB (Essencial) ou mais;
+- Espaço livre em disco de pelo menos 30 GB;
+- Acesso a internet;
+
+----------
+
+## Conteúdo do treinamento:
+Treinamento de 11 semanas (06/08/2021 à 03/11/2021) composto pelos módulos abaixo:
+
 ### <a href="https://badgr.com/public/assertions/61408d1244f9c944ee8f2d15" target="_blank"><img src="https://media.badgr.com/uploads/badges/6d160c59-0aa7-42e3-859f-d6e4013f9aab.png" width="70"></a> [BIG DATA FOUNDATION](https://github.com/cicerooficial/big-data-engineer-sematix/tree/main/1.%20BIG-DATA-FOUNDATION) 
 
 - ✅Introdução ao Big Data
@@ -72,7 +89,10 @@ Treinamento promovido pela Semantix Inc. focado em ambientes e ferramentas para 
 - ✅Struct Streaming | Struct Streaming com Kafka
 - ✅Otimização da Aplicação 
 
-------
+----------
+
+## Projeto:
+Com a conclusão do treinamento, os alunos recebem um desafio prático, a fim de desenvolver ainda mais os conhecimentos adquiridos.
 
 ## ⚙ [Projeto Final Spark: Big Data Enginner](https://github.com/cicerooficial/projeto-final-big-data-enginner-sematix#enviar-os-dados-para-o-hdfs)
 
