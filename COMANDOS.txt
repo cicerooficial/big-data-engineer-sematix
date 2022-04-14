@@ -1,0 +1,634 @@
+#############################################
+
+#                           Comandos Docker                             #
+
+#############################################
+
+- Versão do Docker
+
+docker —version
+
+ 
+
+- Visualizar containers ativos
+
+docker ps
+
+ 
+
+- Visualizar todos os containers
+
+docker ps -a
+
+ 
+
+- Lista os containers
+
+docker container ls
+
+ 
+
+- Baixar as imagens após acessar o link do GitHub
+
+docker-compose pull
+
+ 
+
+- Listar as imagens
+
+docker image ls
+
+ 
+
+- Executar os containers
+
+docker-compose up -d
+
+ 
+
+- Parar os serviços 
+
+docker-compose stop
+
+ 
+
+- Iniciar os serviços 
+
+docker-compose start
+
+ 
+
+- Matar os serviços
+
+docker-compose down
+
+ 
+
+-Apagar todos os volumes sem uso
+
+docker volume prune
+
+ 
+
+- Apagar tudo (image, volume, network)
+
+docker system prune --all
+
+ 
+
+- Executar comandos no container
+
+docker exec -it <container> <comando>
+
+ 
+
+- Visualizar os logs
+
+docker logs <container> 
+
+docker-compose logs
+
+ 
+
+- Extrair arquivos 
+
+docker cp <diretorio> <container>:/<diretorio>
+
+ 
+
+- Acesso ao container namenode
+
+docker exec -it namenode bash
+
+ 
+
+- Listar pastas do namenode
+
+docker exec -it namenode ls
+
+ 
+
+- Acesso ao container do Hive
+
+docker exec -it hive-server bash
+
+ 
+
+################################################
+
+#                              Comandos Sistema HDFS                    #
+
+################################################
+
+- Inicia o Hadoop
+
+hdfs dfs
+
+hadoop fs
+
+ 
+
+- Comando help
+
+hadoop fs -help
+
+hdfs dfs -help
+
+hdfs dfs -help -ls
+
+ 
+
+################################################
+
+#                              Comandos Diretórios                                      #
+
+################################################
+
+ 
+
+- Criar diretório
+
+hdfs dfs mkdir <diretorio>
+
+ 
+
+- Criar estrutura de diretórios 
+
+hdfs dfs mkdir -p <diretorio>/<diretorio>/<diretorio>
+
+ 
+
+- Listar diretórios
+
+hdfs dfs ls / (pra exergar na raiz)
+
+ 
+
+Com recursivo -R 
+
+ 
+
+- Remoção arquivos e diretórios 
+
+hdfs dfs -rm
+
+ 
+
+-r (Deletar diretório)
+
+ 
+
+hdfs dfs -rm -skipTrash (Remover permanentemente) 
+
+ 
+
+################################################
+
+#                           Comandos Enviar Dados                         #
+
+#                                     Local/HDFS                                       #
+
+################################################
+
+ 
+
+- Enviar arquivo ou diretório
+
+hdfs dfs -put <src> <dst> (mais usado)
+
+ 
+
+-f (sobrescreve o destino se já existir)
+
+-l (força um fator de replicação)
+
+copyFromLocal<src> <dst>
+
+ 
+
+- Mover arquivo ou diretório
+
+hdfs dfs put (deleta do local)
+
+hdfs dfs moveFromLocal <src> <dst> 
+
+ 
+
+################################################
+
+#                           Comandos Receber Dados                                #
+
+#                                   HDFS/Local                                                #
+
+################################################
+
+ 
+
+- Receber arquivo ou diretório
+
+hdfs dfs -get <src> <dst>
+
+ 
+
+-f (argumento)
+
+ 
+
+- Criar um arquivo mesclado
+
+hdfs dfs getmerge <src> <dst>
+
+ 
+
+- Mover para o local
+
+hdfs dfs get (que deleta a cópia do HDFS) 
+
+hdfs dfs moveToLocal <src> 
+
+ 
+
+################################################
+
+#                           Comandos Copiar/Mover Dados              #
+
+#             HDFS/HDFS                                    #
+
+################################################
+
+ 
+
+- Copiar arquivo ou diretório
+
+hdfs dfs cp <src> <dst>
+
+ 
+
+-f (argumento)
+
+ 
+
+- Mover arquivo ou diretório
+
+hdfs dfs -mv <src> <dst>
+
+hdfs dfs mv <arq1> <arq2> <arq3>  <dst>
+
+ 
+
+ 
+
+################################################
+
+#                           Comandos de Informações                      #
+
+################################################
+
+ 
+
+- Mostrar o uso do disco
+
+hdfs dfs du -h <diretorio>
+
+ 
+
+-Exibir o espaço livre
+
+hdfs dfs df -h <diretorio>
+
+ 
+
+- Mostrar informações do diretório
+
+hdfs dfs stat <diretorio>
+
+ 
+
+hdfs dfs -stat %r name.txt (fator de replicação)
+
+hdfs dfs -stat %o name.txt (tamanho do bloco)
+
+ 
+
+- Contar o número de diretórios, número de arquivos e tamanho
+
+Do arquivo especificado
+
+hdfs dfs count -h <diretorio>
+
+ 
+
+- Esvaziar lixeira
+
+hdfs dfs expunge 
+
+ 
+
+################################################
+
+#                           Comandos de Arquivos                            #
+
+################################################
+
+ 
+
+- Ver o conteúdo do arquivo
+
+hdfs dfs cat <arquivo>
+
+ 
+
+- Alterar o fator de replicação do arquivo
+
+hdfs dfs -setrep <n de repeticoes> <arquivo>
+
+ 
+
+- Criar arquivo de registro com hora e data
+
+hdfs dfs -touchz<diretorio>
+
+ 
+
+- Retornar as informações da soma de verificação de um 
+
+arquivo
+
+hdfs dfs -checksum <arquivo>
+
+ 
+
+- Mostra o último 1KB do arquivo no console
+
+hdfs dfs -tail [-f] <arquivo>
+
+ 
+
+hdfs dfs -tail name.txt
+
+hdfs dfs -cat name.txt | head -n 1
+
+ 
+
+################################################
+
+#                           Comandos de Localização                       #
+
+################################################
+
+ 
+
+- Localiza todos os arquivos que correspondem a expressão
+
+hdfs dfs -find <caminho> <procura> -print
+
+ 
+
+hdfs dfs -find / -name data
+hdfs dfs -find / -iname Data -print
+hdfs dfs -find input/ -name \*.txt -print 
+
+ 
+
+ 
+
+################################################
+
+#                              Comandos HIVE                                   #
+
+################################################
+
+ 
+
+beeline -u jdbc:hive2://localhost:10000 username password
+
+ 
+
+- Listar todos os BD 
+
+show database; 
+
+ 
+
+- Estrutura sobre o bd 
+
+desc database <nomeBD>; 
+
+ 
+
+- Listar as tabelas 
+
+show tables; 
+
+ 
+
+- Estrutura da tabela 
+
+desc <nomeTabela>; 
+
+desc formatted <nomeTabela>; 
+
+desc extended <nomeTabela>; 
+
+ 
+
+- Criar BD 
+
+createdatabase<nomeBanco>; 
+
+ 
+
+- Local diferente do conf. Hive 
+
+create database <nomeBanco> location “/diretorio”; 
+
+ 
+
+- Adicionar comentário 
+
+create database <nomeBanco> comment “descrição”; 
+
+ 
+
+Ex.:
+
+create database test location “/user/hive/warehouse/test”comment “banco de dados para treinamento”
+
+default
+
+/user/hive/warehouse/test.db
+
+ 
+
+- Exemplo de Tabela Externa 
+
+ 
+
+Create external table user(
+
+id int,
+
+name String,
+
+age int,
+
+)
+
+row format delimited
+
+fields terminated by ‘\t’
+
+lines terminated by ‘\n’
+
+stored as textfile
+
+location ‘/user/cloudera/data/client’
+
+ 
+
+ 
+
+- Pula 1 linhas - cabeçalho
+
+tblproperties(“skip.header.line.count”=“1”)
+
+ 
+
+Tabela interna
+create table user(cod int, name string); 
+
+droptable; (Apaga os dados e metadados )
+
+ 
+
+Tabela externa 
+
+create external table e_user(cod int, name string) location '/user/semantix/data_users';
+
+droptable;
+Usar para compartilhar os dados com outras ferramentas
+
+Apaga apenas os metadados
+Dados ficam armazenado no sistema de arquivos
+- Exemplo create table - ideal colocar em apenas 1 linha
+
+create table pop(zip_code int, total_population int, median_age float,total_males int, total_females int, total_households int, average_household_size float) row format delimited fields terminated by ',' lines terminated by '\n' stored as textfile tblproperties("skip.header.line.count"="1");
+
+ 
+
+- Inserir dados 
+
+insert into table <nomeTabela> partition(<partition>=’<value>’) values(<campo>,<value>), (<campo>,<value>), (<campo>,<value>); 
+
+Ex 
+
+insert into users values(10, ‘Rodrigo’),(11,’Augusto’);
+
+insert into users partition(data=now()) values(10, ‘Rodrigo’),(11,’Augusto’);
+
+insert into users select * from cliente;
+
+- Carregar dados no sistema de arquivos local 
+
+hive> load data inpath <diretório> into table <nomeTabela>; 
+
+ 
+
+Ex.
+
+load data local inpath ‘/home/cloudera/data/test’ into table alunos
+
+load data inpath ‘/user/cloudera/data/test’ overwrite into table alunos partition(id) 
+
+ 
+
+ 
+
+############################################
+
+#                         Particionamento                                 #
+
+############################################
+
+ 
+
+ 
+
+- Particionamento estático
+
+alter table <nome da tabela> add partition(‘partição’=<valor>);
+
+ 
+
+Ex:
+
+alter table logs add partition (data=‘2019-21-02’)
+
+ 
+
+- Parcionamento dinâmico
+
+Insert overwrite table user_cidade partition (cidade) select * from user;
+
+ 
+
+Por padrão vem desativado - Para ativar
+
+SET hive.exec.dynamic.partition = true;
+
+SET hive.exec.dynamic.partition.mode = nonstrict;
+
+ 
+
+- Visualizar partições
+
+Show partitions user;
+
+ 
+
+- Excluir partições de uma tabela
+
+alter table user drop partition (city=‘SP’);
+
+ 
+
+- Alterar nome de partição de uma tabela 
+
+alter table user partition city rename to partition state;
+
+ 
+
+- Exemplo tabela particionada com buckets 
+
+Create table use(
+
+id int,
+
+name String,
+
+age int
+
+)
+
+partitioned by (data String)
+
+clustered by (id) into 4 buckets;
+
+ 
+
+- Reparar tabela 
+
+msck repair table <nome da tabela>
+
+select sum(frequencia) from nascimento where nascimento.ano=2017;
+
+select nascimento.sexo, sum(nascimento.frequencia) from nascimento where nascimento.ano=2015 group by nascimento.sexo;
+
+select * from nascimento where nascimento.sexo='F' order by nascimento.ano desc;
+select * from nascimento where nascimento.sexo='F' and nascimento.nome like'A%'  order by nascimento.ano desc;
+select nascimento.nome, nascimento.frequencia from nascimento where nascimento.ano=2016 limit 5;
+select nascimento.ano, nascimento.sexo, sum(nascimento.frequencia) from nascimento group by nascimento.ano, nascimento.sexo order by nascimento.ano desc;
+select nascimento.ano, max(nascimento.frequencia), nascimento.sexo from nascimento where nascimento.ano=2016 group by nascimento.nome, nascimento.sexo order by nascimento.nome desc;
+select nascimento.ano, nascimento.sexo, sum(nascimento.frequencia) from nascimento where nascimento.nome like 'A%' group by nascimento.ano, nascimento.sexo order by nascimento.ano desc;
+
+
