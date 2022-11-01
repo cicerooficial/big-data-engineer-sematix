@@ -7,7 +7,7 @@
 Treinamento promovido pela Semantix Inc. focado em ambientes e ferramentas para engenharia de dados como: Big Data Foundations, MongoDB, Redis, Kafka, Elastic e Spark.
 
 <p align="middle">
-    <img src="http://img.shields.io/static/v1?label=STATUS&message=CONCLUÍDO&color=RED&style=for-the-badge"/>
+    <img src="https://img.shields.io/badge/STATUS-CONCLUIDO-76B900?style=for-the-badge&logoColor=white"/>
     <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white"/>
     <img src="https://img.shields.io/badge/Hadoop-FFFFFF?style=for-the-badge&logo=hadoop&logoColor=#E35A16"/>
     <img src="https://img.shields.io/badge/MongoDB-white?style=for-the-badge&logo=mongodb&logoColor=4EA94B" />
